@@ -1,0 +1,23 @@
+# JetBrains Rider
+.idea/
+*.iml
+*.iws
+
+# Build artifacts
+[Bb]in/
+[Oo]bj/
+
+# Packages
+packages/
+*.nupkg
+
+# Visual Studio files (often used alongside Rider)
+.vs/
+*.suo
+*.user
+*.userprefs
+
+# Miscellaneous
+Thumbs.db
+Desktop.ini
+.DS_Store

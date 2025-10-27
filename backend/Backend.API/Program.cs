@@ -1,14 +1,29 @@
-var builder = WebApplication.CreateBuilder(args);
+using System.Globalization;
+using Backend.API.Configuration;
+using Serilog;
 
-builder.Services.AddOpenApi();
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console(formatProvider: CultureInfo.InvariantCulture)
+    .CreateBootstrapLogger();
 
-var app = builder.Build();
-
-if (app.Environment.IsDevelopment())
+try
 {
-    app.MapOpenApi();
+    var builder = WebApplication.CreateBuilder(args);
+
+    builder.Services.AddConfiguration(builder.Configuration);
+
+    var app = builder.Build();
+
+    app.Configure();
+
+    app.Run();
 }
-
-app.UseHttpsRedirection();
-
-app.Run();
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Unhandled exception");
+}
+finally
+{
+    Log.CloseAndFlush();
+}
