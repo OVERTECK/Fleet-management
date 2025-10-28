@@ -9,9 +9,10 @@ public static class AppExtensions
     {
         app.UseSerilogRequestLogging();
 
+        app.UseCors("AllowFrontend");
+
         app.UseSwagger();
         app.UseSwaggerUI();
-
         app.MapEndpoints();
 
         return app;

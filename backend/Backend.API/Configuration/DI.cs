@@ -1,5 +1,7 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Features.Cars;
+using Backend.DataAccess;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Exceptions;
 
@@ -14,6 +16,8 @@ public static class DI
         return services
             .AddSerilogLogging(configuration)
             .AddOpenApiSpec()
+            .AddCors()
+            .AddMyDbContext(configuration)
             .AddEndpoints(typeof(DI).Assembly);
     }
 
@@ -36,6 +40,16 @@ public static class DI
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
             .Enrich.WithProperty("Application", "Backend.API"));
+
+        return services;
+    }
+
+    private static IServiceCollection AddMyDbContext(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddDbContext<MyDbContext>(options =>
+        {
+            options.UseNpgsql(configuration.GetConnectionString(nameof(MyDbContext)));
+        });
 
         return services;
     }
