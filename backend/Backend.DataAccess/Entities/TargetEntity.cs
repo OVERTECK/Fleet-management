@@ -6,7 +6,11 @@ public class TargetEntity
 
     public CarEntity Car { get; set; }
 
+    public string CarId { get; set; }
+    
     public DriverEntity Driver { get; set; }
+    
+    public Guid DriverId { get; set; }
 
     public DateTime Start { get; set; }
 
