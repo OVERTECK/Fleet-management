@@ -5,11 +5,11 @@ public class TripEntity
     public Guid Id { get; set; }
 
     public CarEntity Car { get; set; }
-    
+
     public string CarId { get; set; }
 
     public DriverEntity Driver { get; set; }
-    
+
     public Guid DriverId { get; set; }
 
     public DateTime TimeStart { get; set; }
