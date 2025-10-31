@@ -1,6 +1,8 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Features.Cars;
+using Backend.API.Services;
 using Backend.DataAccess;
+using Backend.DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Exceptions;
@@ -12,11 +14,15 @@ public static class DI
     public static IServiceCollection AddConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddScoped<CreateHandler>();
+        services.AddScoped<GetAllCarsHadler>();
+        services.AddScoped<GetByIdCarHandler>();
 
         return services
             .AddSerilogLogging(configuration)
             .AddOpenApiSpec()
             .AddCors()
+            .AddScoped<CarsService>()
+            .AddScoped<CarsRepository>()
             .AddMyDbContext(configuration)
             .AddEndpoints(typeof(DI).Assembly);
     }

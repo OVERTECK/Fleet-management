@@ -10,7 +10,7 @@ public sealed class CarsRepository(MyDbContext dbContext)
         return await dbContext.Cars.ToListAsync();
     }
 
-    public async Task<CarEntity?> GetById(string VIN)
+    public async Task<CarEntity?> GetByVIN(string VIN)
     {
         return await dbContext.Cars.FindAsync(VIN);
     }
