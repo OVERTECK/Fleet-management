@@ -9,21 +9,20 @@ public class GetAllCarsEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/cars", async ([FromServices] GetAllCarsHadler handler) =>
+        app.MapGet("/cars", async ([FromServices] CarsGetAllHadler handler) =>
         {
             return await handler.Handle();
-        })
-        .WithTags(nameof(CarEntity));
+        }).WithTags(nameof(CarEntity));
     }
 }
 
-sealed class GetAllCarsHadler
+sealed class CarsGetAllHadler
 {
-    private readonly ILogger<GetAllCarsHadler> _logger;
+    private readonly ILogger<CarsGetAllHadler> _logger;
     private readonly CarsService _carsService;
 
-    public GetAllCarsHadler(
-        ILogger<GetAllCarsHadler> logger,
+    public CarsGetAllHadler(
+        ILogger<CarsGetAllHadler> logger,
         CarsService carsService)
     {
         _logger = logger;
@@ -49,7 +48,7 @@ sealed class GetAllCarsHadler
         {
             _logger.LogError(e.Message);
 
-            return Results.BadRequest();
+            return Results.InternalServerError("Error fetching cars");
         }
     }
 }

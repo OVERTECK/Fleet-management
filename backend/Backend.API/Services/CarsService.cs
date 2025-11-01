@@ -15,7 +15,7 @@ public class CarsService(
         return await carRepository.GetAll();
     }
 
-    public async Task<CarEntity?> GetByVIN(string vin)
+    public async Task<CarEntity> GetByVIN(string vin)
     {
         logger.LogInformation("Get car by id");
 

@@ -1,5 +1,6 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
+using Backend.DataAccess.Entities;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,19 +12,19 @@ public class GetByIdEnpoint : IEndpoint
     {
         app.MapGet("/cars/{id}", async (
             string id,
-            [FromServices] GetByIdCarHandler getByIdCarHandler) =>
+            [FromServices] CarGetByIdHandler carGetByIdHandler) =>
         {
-            return await getByIdCarHandler.Handle(id);
-        });
+            return await carGetByIdHandler.Handle(id);
+        }).WithTags(nameof(CarEntity));
     }
 }
 
-sealed class GetByIdCarHandler
+sealed class CarGetByIdHandler
 {
     private readonly CarsService _carsService;
     private readonly ILogger<GetByIdEnpoint> _logger;
 
-    public GetByIdCarHandler(
+    public CarGetByIdHandler(
         CarsService carsService,
         ILogger<GetByIdEnpoint> logger)
     {
@@ -33,13 +34,23 @@ sealed class GetByIdCarHandler
 
     public async Task<IResult> Handle(string vin)
     {
-        var searchedCar = await _carsService.GetByVIN(vin);
-
-        if (searchedCar == null)
+        try
         {
+            var searchedCar = await _carsService.GetByVIN(vin);
+
+            return Results.Ok(searchedCar);
+        }
+        catch (NullReferenceException ex)
+        {
+            _logger.LogError(ex, ex.Message);
+
             return Results.NotFound();
         }
-
-        return Results.Ok(searchedCar);
+        catch (Exception e)
+        {
+            _logger.LogError(e, e.Message);
+            
+            return Results.InternalServerError("Error updating car");
+        }
     }
 }

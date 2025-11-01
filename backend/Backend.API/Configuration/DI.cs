@@ -13,16 +13,13 @@ public static class DI
 {
     public static IServiceCollection AddConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddScoped<CreateHandler>();
-        services.AddScoped<GetAllCarsHadler>();
-        services.AddScoped<GetByIdCarHandler>();
-
         return services
             .AddSerilogLogging(configuration)
             .AddOpenApiSpec()
             .AddCors()
-            .AddScoped<CarsService>()
-            .AddScoped<CarsRepository>()
+            .AddMyHandlers()
+            .AddServices()
+            .AddRepositories()
             .AddMyDbContext(configuration)
             .AddEndpoints(typeof(DI).Assembly);
     }
@@ -56,6 +53,31 @@ public static class DI
         {
             options.UseNpgsql(configuration.GetConnectionString(nameof(MyDbContext)));
         });
+
+        return services;
+    }
+
+    private static IServiceCollection AddMyHandlers(this IServiceCollection services)
+    {
+        services.AddScoped<CarsGetAllHadler>();
+        services.AddScoped<CarGetByIdHandler>();
+        services.AddScoped<CarCreateHandler>();
+        services.AddScoped<CarUpdateHandler>();
+        services.AddScoped<CarDeleteHandler>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddServices(this IServiceCollection services)
+    {
+        services.AddScoped<CarsService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddRepositories(this IServiceCollection services)
+    {
+        services.AddScoped<CarsRepository>();
 
         return services;
     }

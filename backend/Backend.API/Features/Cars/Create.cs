@@ -9,7 +9,7 @@ public class CreateEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/cars", async (CreateCarRequest carRequest, CreateHandler handler) =>
+        app.MapPost("/cars", async (CreateCarRequest carRequest, CarCreateHandler handler) =>
         {
             return await handler.Handle(carRequest);
         })
@@ -17,13 +17,13 @@ public class CreateEndpoint : IEndpoint
     }
 }
 
-sealed class CreateHandler
+sealed class CarCreateHandler
 {
-    private readonly ILogger<CreateHandler> _logger;
+    private readonly ILogger<CarCreateHandler> _logger;
     private readonly CarsService _carsService;
 
-    public CreateHandler(
-        ILogger<CreateHandler> logger,
+    public CarCreateHandler(
+        ILogger<CarCreateHandler> logger,
         CarsService carsService)
     {
         _logger = logger;
@@ -44,7 +44,7 @@ sealed class CreateHandler
         {
             _logger.LogError(e, e.Message);
 
-            return Results.BadRequest();
+            return Results.InternalServerError("Error creating car");
         }
     }
 }

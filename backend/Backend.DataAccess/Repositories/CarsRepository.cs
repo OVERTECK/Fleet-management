@@ -10,9 +10,16 @@ public sealed class CarsRepository(MyDbContext dbContext)
         return await dbContext.Cars.ToListAsync();
     }
 
-    public async Task<CarEntity?> GetByVIN(string VIN)
+    public async Task<CarEntity?> GetByVIN(string vin)
     {
-        return await dbContext.Cars.FindAsync(VIN);
+        var seachedCar = await dbContext.Cars.FirstOrDefaultAsync(c => c.VIN == vin);
+
+        if (seachedCar == null)
+        {
+            throw new NullReferenceException($"Car with vin {vin} not found");
+        }
+
+        return seachedCar;
     }
 
     public async Task Create(CarEntity car)
@@ -24,6 +31,13 @@ public sealed class CarsRepository(MyDbContext dbContext)
 
     public async Task Update(CarEntity car)
     {
+        var searchedCar = await dbContext.Cars.FirstOrDefaultAsync(c => c.VIN == car.VIN);
+
+        if (searchedCar == null)
+        {
+            throw new NullReferenceException($"Car with vin {car.VIN} not found");
+        }
+
         await dbContext.Cars.Where(c => c.VIN == car.VIN)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(c => c.VIN, car.VIN)
@@ -35,9 +49,16 @@ public sealed class CarsRepository(MyDbContext dbContext)
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task Delete(string VIN)
+    public async Task Delete(string vin)
     {
-        await dbContext.Cars.Where(c => c.VIN == VIN).ExecuteDeleteAsync();
+        var searchedCar = await dbContext.Cars.FirstOrDefaultAsync(c => c.VIN == vin);
+
+        if (searchedCar == null)
+        {
+            throw new NullReferenceException($"Car with vin {vin} not found");
+        }
+
+        await dbContext.Cars.Where(c => c.VIN == vin).ExecuteDeleteAsync();
 
         await dbContext.SaveChangesAsync();
     }
