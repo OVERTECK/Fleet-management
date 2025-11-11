@@ -9,35 +9,37 @@ public class DriversService(
 {
     public async Task<List<DriverEntity>> GetAll()
     {
-        logger.LogInformation("Get all drivers");
+        logger.LogInformation($"{nameof(DriversService)}: Get all drivers");
 
         return await driversRepository.GetAll();
     }
 
     public async Task<DriverEntity?> GetById(Guid id)
     {
-        logger.LogInformation("Get driver by id");
+        logger.LogInformation($"{nameof(DriversService)}: Get driver by id");
 
         return await driversRepository.GetById(id);
     }
 
     public async Task Create(DriverEntity driver)
     {
-        logger.LogInformation("Create driver");
+        logger.LogInformation($"{nameof(DriversService)}: Create driver");
+
+        driver.Id = Guid.NewGuid();
 
         await driversRepository.Create(driver);
     }
 
     public async Task Update(DriverEntity driver)
     {
-        logger.LogInformation("Update driver");
+        logger.LogInformation($"{nameof(DriversService)}: Update driver");
 
         await driversRepository.Update(driver);
     }
 
     public async Task Delete(Guid id)
     {
-        logger.LogInformation("Delete driver");
+        logger.LogInformation($"{nameof(DriversService)}: Delete driver");
 
         await driversRepository.Delete(id);
     }

@@ -50,7 +50,7 @@ class CarUpdateHandler
         catch (Exception)
         {
             _logger.LogError($"Error while updating car: {car.VIN}");
-            
+
             return Results.InternalServerError("Error updating car");
         }
     }

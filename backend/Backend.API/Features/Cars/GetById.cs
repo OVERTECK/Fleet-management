@@ -49,7 +49,7 @@ sealed class CarGetByIdHandler
         catch (Exception e)
         {
             _logger.LogError(e, e.Message);
-            
+
             return Results.InternalServerError("Error updating car");
         }
     }

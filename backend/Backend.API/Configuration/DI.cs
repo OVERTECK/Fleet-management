@@ -1,5 +1,6 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Features.Cars;
+using Backend.API.Features.Drivers;
 using Backend.API.Services;
 using Backend.DataAccess;
 using Backend.DataAccess.Repositories;
@@ -65,20 +66,34 @@ public static class DI
         services.AddScoped<CarUpdateHandler>();
         services.AddScoped<CarDeleteHandler>();
 
+        services.AddScoped<DriverCreateHandler>();
+        services.AddScoped<DriverGetAllHandler>();
+        services.AddScoped<DriverGetByIdHandler>();
+        services.AddScoped<DriverUpdateHandler>();
+        services.AddScoped<DriverDeleteHandler>();
+
         return services;
     }
 
     private static IServiceCollection AddServices(this IServiceCollection services)
     {
         services.AddScoped<CarsService>();
-
+        services.AddScoped<DriversService>();
+        // services.AddScoped<GasSta>();
+        
         return services;
     }
 
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<CarsRepository>();
-
+        services.AddScoped<DriversRepository>();
+        services.AddScoped<GasStationsRepository>();
+        services.AddScoped<MaintenanceRecordsRepository>();
+        services.AddScoped<RouteRepository>();
+        services.AddScoped<TargetsRepository>();
+        services.AddScoped<TripsRepository>();
+        
         return services;
     }
 

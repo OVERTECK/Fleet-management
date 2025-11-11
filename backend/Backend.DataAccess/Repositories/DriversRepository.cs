@@ -12,7 +12,14 @@ public sealed class DriversRepository(MyDbContext dbContext)
 
     public async Task<DriverEntity?> GetById(Guid id)
     {
-        return await dbContext.Drivers.FindAsync(id);
+        var searchedDriver = await dbContext.Drivers.FirstOrDefaultAsync(c => c.Id == id);
+
+        if (searchedDriver == null)
+        {
+            throw new NullReferenceException();
+        }
+
+        return searchedDriver;
     }
 
     public async Task Create(DriverEntity driver)
@@ -24,6 +31,13 @@ public sealed class DriversRepository(MyDbContext dbContext)
 
     public async Task Update(DriverEntity driver)
     {
+        var searchedDriver = await dbContext.Drivers.FirstOrDefaultAsync(c => c.Id == driver.Id);
+
+        if (searchedDriver == null)
+        {
+            throw new NullReferenceException();
+        }
+
         await dbContext.Drivers.Where(c => c.Id == driver.Id)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(c => c.Name, driver.Name)
@@ -37,6 +51,13 @@ public sealed class DriversRepository(MyDbContext dbContext)
 
     public async Task Delete(Guid id)
     {
+        var searchedDriver = await dbContext.Drivers.FirstOrDefaultAsync(c => c.Id == id);
+
+        if (searchedDriver == null)
+        {
+            throw new NullReferenceException();
+        }
+
         await dbContext.Drivers.Where(c => c.Id == id).ExecuteDeleteAsync();
 
         await dbContext.SaveChangesAsync();
