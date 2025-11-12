@@ -1,0 +1,44 @@
+using Backend.DataAccess.Entities;
+using Backend.DataAccess.Repositories;
+
+namespace Backend.API.Services;
+
+public class GasStationsService(ILogger<GasStationsService> logger, GasStationsRepository repository)
+{
+    public async Task<List<GasStationEntity>> GetAll(CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation($"{nameof(GasStationsService)}: Get all gas stations");
+
+        return await repository.GetAll(cancellationToken);
+    }
+
+    public async Task<GasStationEntity?> GetById(Guid id, CancellationToken cancellationToken = default)
+    {
+        logger.LogInformation($"{nameof(GasStationsService)}: Get gas station by id");
+
+        return await repository.GetById(id, cancellationToken);
+    }
+
+    public async Task Create(GasStationEntity driver, CancellationToken cancellationToken)
+    {
+        logger.LogInformation($"{nameof(GasStationsService)}: Create gas station");
+
+        driver.Id = Guid.NewGuid();
+
+        await repository.Create(driver, cancellationToken);
+    }
+
+    public async Task Update(GasStationEntity driver, CancellationToken cancellationToken)
+    {
+        logger.LogInformation($"{nameof(GasStationsService)}: Update gas station");
+
+        await repository.Update(driver, cancellationToken);
+    }
+
+    public async Task Delete(Guid id, CancellationToken cancellationToken)
+    {
+        logger.LogInformation($"{nameof(GasStationsService)}: Delete gas station");
+
+        await repository.Delete(id, cancellationToken);
+    }
+}

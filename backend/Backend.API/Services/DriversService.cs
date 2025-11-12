@@ -1,3 +1,4 @@
+using Backend.DataAccess.DTO.Requests.Driver;
 using Backend.DataAccess.Entities;
 using Backend.DataAccess.Repositories;
 
@@ -21,11 +22,19 @@ public class DriversService(
         return await driversRepository.GetById(id);
     }
 
-    public async Task Create(DriverEntity driver)
+    public async Task Create(CreateDriverRequest driverRequest)
     {
         logger.LogInformation($"{nameof(DriversService)}: Create driver");
 
-        driver.Id = Guid.NewGuid();
+        var driver = new DriverEntity
+        {
+            Id = Guid.NewGuid(),
+            Name = driverRequest.Name,
+            CategoryDrive = driverRequest.CategoryDrive,
+            ContactData = driverRequest.ContactData,
+            LastName = driverRequest.LastName,
+            Pathronymic = driverRequest.Pathronymic,
+        };
 
         await driversRepository.Create(driver);
     }

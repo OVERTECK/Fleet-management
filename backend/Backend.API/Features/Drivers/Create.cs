@@ -1,5 +1,6 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
+using Backend.DataAccess.DTO.Requests.Driver;
 using Backend.DataAccess.Entities;
 
 namespace Backend.API.Features.Drivers;
@@ -8,9 +9,9 @@ public class CreateDriversEndpoint : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/drivers", async (DriverEntity driverEntity, DriverCreateHandler handler) =>
+        app.MapPost("/drivers", async (CreateDriverRequest driverRequest, DriverCreateHandler handler) =>
         {
-            return await handler.Handle(driverEntity);
+            return await handler.Handle(driverRequest);
         }).WithTags(nameof(DriverEntity));
     }
 }
@@ -19,13 +20,13 @@ public sealed class DriverCreateHandler(
     ILogger<CreateDriversEndpoint> logger,
     DriversService driversService)
 {
-    public async Task<IResult> Handle(DriverEntity driverEntity)
+    public async Task<IResult> Handle(CreateDriverRequest driverRequest)
     {
         try
         {
-            logger.LogInformation($"Creating driver: {driverEntity.Id}");
+            logger.LogInformation($"{nameof(DriverCreateHandler)}: creating driver");
 
-            await driversService.Create(driverEntity);
+            await driversService.Create(driverRequest);
 
             return Results.Created();
         }

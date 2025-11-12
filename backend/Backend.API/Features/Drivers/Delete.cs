@@ -25,6 +25,12 @@ public sealed class DriverDeleteHandler(ILogger<DriverDeleteHandler> _logger, Dr
 
             return Results.Ok();
         }
+        catch (OperationCanceledException)
+        {
+            _logger.LogInformation($"{nameof(DriverDeleteHandler)} was cancelled");
+
+            return Results.StatusCode(499);
+        }
         catch (NullReferenceException ex)
         {
             _logger.LogError(ex, ex.Message);

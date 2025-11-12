@@ -5,38 +5,35 @@ namespace Backend.DataAccess.Repositories;
 
 public class GasStationsRepository(MyDbContext dbContext)
 {
-    public async Task<List<GasStationEntity>> GetAll()
+    public async Task<List<GasStationEntity>> GetAll(CancellationToken cancellationToken = default)
     {
-        return await dbContext.GasStations.ToListAsync();
+        return await dbContext.GasStations.ToListAsync(cancellationToken);
     }
 
-    public async Task<GasStationEntity?> GetById(Guid id)
+    public async Task<GasStationEntity?> GetById(Guid id, CancellationToken cancellationToken = default)
     {
-        return await dbContext.GasStations.FindAsync(id);
+        return await dbContext.GasStations.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
-    public async Task Create(GasStationEntity gasStation)
+    public async Task Create(GasStationEntity gasStation, CancellationToken cancellationToken = default)
     {
-        await dbContext.GasStations.AddAsync(gasStation);
+        await dbContext.GasStations.AddAsync(gasStation, cancellationToken);
 
-        await dbContext.SaveChangesAsync();
+        await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task Update(GasStationEntity gasStation)
+    public async Task Update(GasStationEntity gasStation, CancellationToken cancellationToken = default)
     {
         await dbContext.GasStations.Where(c => c.Id == gasStation.Id)
-            .ExecuteUpdateAsync(s => s
+            .ExecuteUpdateAsync(
+                s => s
                 .SetProperty(c => c.CarId, gasStation.CarId)
                 .SetProperty(c => c.Price, gasStation.Price)
-                .SetProperty(c => c.RefilledLiters, gasStation.RefilledLiters));
-
-        await dbContext.SaveChangesAsync();
+                .SetProperty(c => c.RefilledLiters, gasStation.RefilledLiters), cancellationToken);
     }
 
-    public async Task Delete(Guid id)
+    public async Task Delete(Guid id, CancellationToken cancellationToken = default)
     {
-        await dbContext.GasStations.Where(c => c.Id == id).ExecuteDeleteAsync();
-
-        await dbContext.SaveChangesAsync();
+        await dbContext.GasStations.Where(c => c.Id == id).ExecuteDeleteAsync(cancellationToken);
     }
 }

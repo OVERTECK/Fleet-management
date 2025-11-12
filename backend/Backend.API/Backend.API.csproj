@@ -50,7 +50,6 @@
 
     <ItemGroup>
       <Folder Include="Abstractions\" />
-      <Folder Include="Features\GasStation\" />
       <Folder Include="Features\MaintenanceRecords\" />
       <Folder Include="Features\Routes\" />
       <Folder Include="Features\Targets\" />
