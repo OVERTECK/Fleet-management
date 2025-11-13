@@ -14,7 +14,7 @@ public class CreateGasStationEndpoint : IEndpoint
             CancellationToken cancellationToken) =>
         {
             return await handler.Handle(entity, cancellationToken);
-        });
+        }).WithTags(nameof(GasStationEntity));
     }
 }
 

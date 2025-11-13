@@ -13,7 +13,7 @@ public class GetAll : IEndpoint
             CancellationToken cancellationToken) =>
         {
             return await handler.Handle(cancellationToken);
-        });
+        }).WithTags(nameof(GasStationEntity));
     }
 }
 

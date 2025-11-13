@@ -14,7 +14,7 @@ public class DeleteGasStationEndpoint : IEndpoint
             CancellationToken cancellationToken) =>
         {
             return await handler.Handle(id, cancellationToken);
-        });
+        }).WithTags(nameof(GasStationEntity));
     }
 }
 

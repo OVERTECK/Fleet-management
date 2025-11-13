@@ -14,7 +14,7 @@ public class Update : IEndpoint
             CancellationToken cancellationToken) =>
         {
             return await handler.Handle(entity, cancellationToken);
-        });
+        }).WithTags(nameof(GasStationEntity));
     }
 }
 
