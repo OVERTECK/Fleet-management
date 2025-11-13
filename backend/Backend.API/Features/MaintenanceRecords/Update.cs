@@ -1,6 +1,5 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
-using Backend.DataAccess.DTO.Requests;
 using Backend.DataAccess.Entities;
 
 namespace Backend.API.Features.MaintenanceRecords;
@@ -15,7 +14,7 @@ public class Update : IEndpoint
             CancellationToken cancellationToken) =>
         {
             return await handler.Handle(entity, cancellationToken);
-        });
+        }).WithTags(nameof(MaintenanceRecordEntity));
     }
 }
 

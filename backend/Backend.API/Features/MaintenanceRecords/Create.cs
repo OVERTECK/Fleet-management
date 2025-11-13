@@ -15,7 +15,7 @@ public class Create : IEndpoint
             CancellationToken cancellationToken) =>
         {
             return await handler.Handle(request, cancellationToken);
-        });
+        }).WithTags(nameof(MaintenanceRecordEntity));
     }
 }
 

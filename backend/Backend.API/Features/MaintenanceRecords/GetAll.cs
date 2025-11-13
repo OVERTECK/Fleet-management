@@ -1,5 +1,6 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
+using Backend.DataAccess.Entities;
 
 namespace Backend.API.Features.MaintenanceRecords;
 
@@ -12,7 +13,7 @@ public class GetAll : IEndpoint
             CancellationToken cancellationToken) =>
         {
             return await handler.Handle(cancellationToken);
-        });
+        }).WithTags(nameof(MaintenanceRecordEntity));
     }
 }
 
