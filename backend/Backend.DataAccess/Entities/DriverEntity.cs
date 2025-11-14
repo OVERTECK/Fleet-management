@@ -2,15 +2,15 @@ namespace Backend.DataAccess.Entities;
 
 public class DriverEntity
 {
-    public Guid Id { get; set; }
+    public required Guid Id { get; init; }
 
-    public string Name { get; set; }
+    public required string Name { get; init; }
 
-    public string LastName { get; set; }
+    public required string LastName { get; init; }
 
-    public string Pathronymic { get; set; }
+    public required string Pathronymic { get; init; }
 
-    public string ContactData { get; set; }
+    public required string ContactData { get; init; }
 
-    public string CategoryDrive { get; set; }
+    public required string CategoryDrive { get; init; }
 }

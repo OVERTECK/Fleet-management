@@ -7,18 +7,18 @@ public class MaintenanceRecordsRepository(MyDbContext dbContext)
 {
     public async Task<List<MaintenanceRecordEntity>> GetAll(CancellationToken cancellationToken)
     {
-        return await dbContext.MaintenanceRecords.ToListAsync(cancellationToken);
+        return await dbContext.MaintenanceRecords
+            .Include(c => c.Car)
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<MaintenanceRecordEntity?> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var searchedMaintenanceRecord = await dbContext.MaintenanceRecords
-            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        await this.EnsureExists(id);
 
-        if (searchedMaintenanceRecord == null)
-        {
-            throw new NullReferenceException($"Maintenance record with id {id} not found.");
-        }
+        var searchedMaintenanceRecord = await dbContext.MaintenanceRecords
+            .Include(c => c.Car)
+            .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 
         return searchedMaintenanceRecord;
     }
@@ -30,8 +30,12 @@ public class MaintenanceRecordsRepository(MyDbContext dbContext)
         await dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task Update(MaintenanceRecordEntity maintenanceRecord, CancellationToken cancellationToken)
+    public async Task Update(
+        MaintenanceRecordEntity maintenanceRecord,
+        CancellationToken cancellationToken)
     {
+        await this.EnsureExists(maintenanceRecord.Id);
+
         await dbContext.MaintenanceRecords.Where(c => c.Id == maintenanceRecord.Id)
             .ExecuteUpdateAsync(
                 s => s
@@ -42,6 +46,18 @@ public class MaintenanceRecordsRepository(MyDbContext dbContext)
 
     public async Task Delete(Guid id, CancellationToken cancellationToken)
     {
+        await this.EnsureExists(id);
+
         await dbContext.MaintenanceRecords.Where(c => c.Id == id).ExecuteDeleteAsync(cancellationToken);
+    }
+
+    public async Task EnsureExists(Guid id)
+    {
+        var searchedMaintenanceRecord = await dbContext.MaintenanceRecords.FindAsync(id);
+
+        if (searchedMaintenanceRecord == null)
+        {
+            throw new NullReferenceException($"Unable to find maintenance record with id {id}");
+        }
     }
 }

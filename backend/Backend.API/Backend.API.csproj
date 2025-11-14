@@ -50,9 +50,6 @@
 
     <ItemGroup>
       <Folder Include="Abstractions\" />
-      <Folder Include="Features\Routes\" />
-      <Folder Include="Features\Targets\" />
-      <Folder Include="Features\Trips\" />
     </ItemGroup>
 
 </Project>

@@ -12,6 +12,8 @@ public class TargetsRepository(MyDbContext dbContext)
 
     public async Task<TargetEntity?> GetById(Guid id)
     {
+        await this.EnsureExists(id);
+
         return await dbContext.Targets.FindAsync(id);
     }
 
@@ -30,14 +32,22 @@ public class TargetsRepository(MyDbContext dbContext)
                 .SetProperty(c => c.DriverId, target.DriverId)
                 .SetProperty(c => c.Start, target.Start)
                 .SetProperty(c => c.End, target.End));
-
-        await dbContext.SaveChangesAsync();
     }
 
     public async Task Delete(Guid id)
     {
-        await dbContext.Targets.Where(c => c.Id == id).ExecuteDeleteAsync();
+        await this.EnsureExists(id);
 
-        await dbContext.SaveChangesAsync();
+        await dbContext.Targets.Where(c => c.Id == id).ExecuteDeleteAsync();
+    }
+
+    public async Task EnsureExists(Guid id)
+    {
+        var target = await dbContext.Targets.FindAsync(id);
+
+        if (target == null)
+        {
+            throw new NullReferenceException($"Unable to find target with id {id}");
+        }
     }
 }

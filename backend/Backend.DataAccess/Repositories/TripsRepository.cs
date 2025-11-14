@@ -12,7 +12,9 @@ public class TripsRepository(MyDbContext dbContext)
 
     public async Task<TripEntity?> GetById(Guid id)
     {
-        return await dbContext.Trips.FindAsync(id);
+        await this.EnsureExists(id);
+
+        return await dbContext.Trips.FirstOrDefaultAsync(c => c.Id == id);
     }
 
     public async Task Create(TripEntity trip)
@@ -24,6 +26,8 @@ public class TripsRepository(MyDbContext dbContext)
 
     public async Task Update(TripEntity trip)
     {
+        await this.EnsureExists(trip.Id);
+
         await dbContext.Trips.Where(c => c.Id == trip.Id)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(c => c.CarId, trip.CarId)
@@ -32,14 +36,22 @@ public class TripsRepository(MyDbContext dbContext)
                 .SetProperty(c => c.TimeEnd, trip.TimeEnd)
                 .SetProperty(c => c.TraveledKM, trip.TraveledKM)
                 .SetProperty(c => c.ConsumptionLitersFuel, trip.ConsumptionLitersFuel));
-
-        await dbContext.SaveChangesAsync();
     }
 
     public async Task Delete(Guid id)
     {
-        await dbContext.Trips.Where(c => c.Id == id).ExecuteDeleteAsync();
+        await this.EnsureExists(id);
 
-        await dbContext.SaveChangesAsync();
+        await dbContext.Trips.Where(c => c.Id == id).ExecuteDeleteAsync();
+    }
+
+    public async Task EnsureExists(Guid id)
+    {
+        var trip = await dbContext.Trips.FindAsync(id);
+
+        if (trip == null)
+        {
+            throw new NullReferenceException($"Unable to find trip with id {id}");
+        }
     }
 }

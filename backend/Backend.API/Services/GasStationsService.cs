@@ -1,3 +1,4 @@
+using Backend.DataAccess.DTO.Requests;
 using Backend.DataAccess.Entities;
 using Backend.DataAccess.Repositories;
 
@@ -19,20 +20,26 @@ public class GasStationsService(ILogger<GasStationsService> logger, GasStationsR
         return await repository.GetById(id, cancellationToken);
     }
 
-    public async Task Create(GasStationEntity driver, CancellationToken cancellationToken)
+    public async Task Create(CreateGasStationRequest gasStationRequest, CancellationToken cancellationToken)
     {
         logger.LogInformation($"{nameof(GasStationsService)}: Create gas station");
 
-        driver.Id = Guid.NewGuid();
+        var gasStation = new GasStationEntity
+        {
+            Id = Guid.NewGuid(),
+            CarId = gasStationRequest.CarId,
+            Price = gasStationRequest.Price,
+            RefilledLiters = gasStationRequest.RefilledLiters,
+        };
 
-        await repository.Create(driver, cancellationToken);
+        await repository.Create(gasStation, cancellationToken);
     }
 
-    public async Task Update(GasStationEntity driver, CancellationToken cancellationToken)
+    public async Task Update(GasStationEntity gasStation, CancellationToken cancellationToken)
     {
         logger.LogInformation($"{nameof(GasStationsService)}: Update gas station");
 
-        await repository.Update(driver, cancellationToken);
+        await repository.Update(gasStation, cancellationToken);
     }
 
     public async Task Delete(Guid id, CancellationToken cancellationToken)

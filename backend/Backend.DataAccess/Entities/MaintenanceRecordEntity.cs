@@ -1,14 +1,16 @@
+using System.Text.Json.Serialization;
+
 namespace Backend.DataAccess.Entities;
 
 public class MaintenanceRecordEntity
 {
-    public Guid Id { get; set; }
+    public required Guid Id { get; init; }
 
-    public CarEntity Car { get; set; }
+    public CarEntity Car { get; init; }
 
-    public string CarId { get; set; }
+    public required string CarId { get; init; }
 
-    public string TypeWork { get; set; }
+    public required string TypeWork { get; init; }
 
-    public Decimal Price { get; set; }
+    public required Decimal Price { get; init; }
 }

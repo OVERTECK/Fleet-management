@@ -2,17 +2,17 @@ namespace Backend.DataAccess.Entities;
 
 public class TargetEntity
 {
-    public Guid Id { get; set; }
+    public required Guid Id { get; init; }
 
-    public CarEntity Car { get; set; }
+    public CarEntity Car { get; init; }
 
-    public string CarId { get; set; }
+    public required string CarId { get; init; }
 
-    public DriverEntity Driver { get; set; }
+    public DriverEntity Driver { get; init; }
 
-    public Guid DriverId { get; set; }
+    public required Guid DriverId { get; init; }
 
-    public DateTime Start { get; set; }
+    public required DateTime Start { get; init; }
 
-    public DateTime End { get; set; }
+    public required DateTime End { get; init; }
 }

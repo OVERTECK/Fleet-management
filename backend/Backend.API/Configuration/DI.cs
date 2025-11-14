@@ -3,12 +3,14 @@ using Backend.API.Features.Cars;
 using Backend.API.Features.Drivers;
 using Backend.API.Features.GasStation;
 using Backend.API.Features.MaintenanceRecords;
+using Backend.API.Features.Routes;
 using Backend.API.Services;
 using Backend.DataAccess;
 using Backend.DataAccess.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Exceptions;
+using Update = Backend.API.Features.GasStation.Update;
 
 namespace Backend.API.Configuration;
 
@@ -86,6 +88,12 @@ public static class DI
         services.AddScoped<MaintenanceRecordGetAllHandler>();
         services.AddScoped<MaintenanceRecordGetByIdHandler>();
 
+        services.AddScoped<RoutesCreateHandler>();
+        services.AddScoped<RoutesUpdateHandler>();
+        services.AddScoped<RoutesDeleteHandler>();
+        services.AddScoped<RoutesGetAllHandler>();
+        services.AddScoped<RoutesGetByIdHandler>();
+
         return services;
     }
 
@@ -95,6 +103,9 @@ public static class DI
         services.AddScoped<DriversService>();
         services.AddScoped<GasStationsService>();
         services.AddScoped<MaintenanceRecordsService>();
+        services.AddScoped<RoutesService>();
+        services.AddScoped<TargetsService>();
+        services.AddScoped<TripsService>();
 
         return services;
     }

@@ -30,9 +30,9 @@ sealed class MaintenanceRecordGetByIdHandler(
         {
             logger.LogInformation($"{nameof(MaintenanceRecordGetByIdHandler)}: Get by id maintenance record.");
 
-            await service.GetById(id, cancellationToken);
+            var searchedMaintenanceRecords = await service.GetById(id, cancellationToken);
 
-            return Results.Ok();
+            return Results.Ok(searchedMaintenanceRecords);
         }
         catch (OperationCanceledException)
         {

@@ -62,4 +62,14 @@ public sealed class CarsRepository(MyDbContext dbContext)
 
         await dbContext.SaveChangesAsync();
     }
+
+    public async Task EnsureExists(string id)
+    {
+        var car = await dbContext.Cars.FindAsync(id);
+
+        if (car == null)
+        {
+            throw new NullReferenceException($"Unable to find car with id {id}");
+        }
+    }
 }

@@ -2,11 +2,11 @@ namespace Backend.DataAccess.Entities;
 
 public class RouteEntity
 {
-    public Guid Id { get; set; }
+    public required Guid Id { get; init; }
 
-    public DateTime Start { get; set; }
+    public required DateTime Start { get; init; }
 
-    public DateTime End { get; set; }
+    public required DateTime End { get; init; }
 
-    public int CountKM { get; set; }
+    public required int CountKM { get; init; }
 }

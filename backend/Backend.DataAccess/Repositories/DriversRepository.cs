@@ -5,6 +5,7 @@ namespace Backend.DataAccess.Repositories;
 
 public sealed class DriversRepository(MyDbContext dbContext)
 {
+
     public async Task<List<DriverEntity>> GetAll()
     {
         return await dbContext.Drivers.ToListAsync();
@@ -61,5 +62,15 @@ public sealed class DriversRepository(MyDbContext dbContext)
         await dbContext.Drivers.Where(c => c.Id == id).ExecuteDeleteAsync();
 
         await dbContext.SaveChangesAsync();
+    }
+
+    public async Task EnsureExists(Guid id)
+    {
+        var driver = await dbContext.Drivers.FindAsync(id);
+
+        if (driver == null)
+        {
+            throw new NullReferenceException($"Unable to find driver with id {id}");
+        }
     }
 }

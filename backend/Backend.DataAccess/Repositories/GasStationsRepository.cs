@@ -24,6 +24,20 @@ public class GasStationsRepository(MyDbContext dbContext)
 
     public async Task Update(GasStationEntity gasStation, CancellationToken cancellationToken = default)
     {
+        var searchedCar = await dbContext.Cars.FirstOrDefaultAsync(c => c.VIN == gasStation.CarId, cancellationToken);
+
+        if (searchedCar == null)
+        {
+            throw new NullReferenceException($"Car with VIN {gasStation.CarId} not found");
+        }
+
+        var searchedGasStation = await dbContext.GasStations.FirstOrDefaultAsync(c => c.Id == gasStation.Id, cancellationToken);
+
+        if (searchedGasStation == null)
+        {
+            throw new NullReferenceException($"Gas Station with VIN {gasStation.Id} not found");
+        }
+
         await dbContext.GasStations.Where(c => c.Id == gasStation.Id)
             .ExecuteUpdateAsync(
                 s => s

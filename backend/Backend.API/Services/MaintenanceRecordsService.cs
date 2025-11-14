@@ -27,6 +27,7 @@ public class MaintenanceRecordsService(MaintenanceRecordsRepository repository, 
         var maintenanceRecord = new MaintenanceRecordEntity
         {
             Id = Guid.NewGuid(),
+            Price = request.Price,
             CarId = request.CarId,
             TypeWork = request.TypeWork,
         };
@@ -34,9 +35,17 @@ public class MaintenanceRecordsService(MaintenanceRecordsRepository repository, 
         await repository.Create(maintenanceRecord, cancellationToken);
     }
 
-    public async Task Update(MaintenanceRecordEntity maintenanceRecord, CancellationToken cancellationToken)
+    public async Task Update(UpdateMaintenanceRecordRequest maintenanceRecordRequest, CancellationToken cancellationToken)
     {
         logger.LogInformation($"{nameof(MaintenanceRecordEntity)}: Update maintenance record");
+
+        var maintenanceRecord = new MaintenanceRecordEntity
+        {
+            Id = maintenanceRecordRequest.Id,
+            Price = maintenanceRecordRequest.Price,
+            CarId = maintenanceRecordRequest.CarId,
+            TypeWork = maintenanceRecordRequest.TypeWork,
+        };
 
         await repository.Update(maintenanceRecord, cancellationToken);
     }

@@ -1,5 +1,6 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
+using Backend.DataAccess.DTO.Requests;
 using Backend.DataAccess.Entities;
 
 namespace Backend.API.Features.MaintenanceRecords;
@@ -9,11 +10,11 @@ public class Update : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPut("/maintenanceRecords", async (
-            MaintenanceRecordEntity entity,
+            UpdateMaintenanceRecordRequest request,
             MaintenanceRecordUpdateHandler handler,
             CancellationToken cancellationToken) =>
         {
-            return await handler.Handle(entity, cancellationToken);
+            return await handler.Handle(request, cancellationToken);
         }).WithTags(nameof(MaintenanceRecordEntity));
     }
 }
@@ -23,14 +24,14 @@ sealed class MaintenanceRecordUpdateHandler(
     MaintenanceRecordsService service)
 {
     public async Task<IResult> Handle(
-        MaintenanceRecordEntity entity,
+        UpdateMaintenanceRecordRequest request,
         CancellationToken cancellationToken)
     {
         try
         {
             logger.LogInformation($"Updating maintenance record.");
 
-            await service.Update(entity, cancellationToken);
+            await service.Update(request, cancellationToken);
 
             return Results.Ok();
         }
@@ -44,14 +45,14 @@ sealed class MaintenanceRecordUpdateHandler(
         {
             logger.LogError(ex, ex.Message);
 
-            return Results.NotFound();
+            return Results.NotFound("Maintenance record not found");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, ex.Message);
 
             return Results.InternalServerError(
-                $"Error updating {nameof(MaintenanceRecordCreateHandler)}: {ex.Message}");
+                $"Error updating {nameof(MaintenanceRecordCreateHandler)}");
         }
     }
 }

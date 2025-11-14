@@ -1,14 +1,17 @@
+using System.Text.Json.Serialization;
+
 namespace Backend.DataAccess.Entities;
 
 public class GasStationEntity
 {
-    public Guid Id { get; set; }
+    public required Guid Id { get; init; }
 
-    public CarEntity Car { get; set; }
+    public required string CarId { get; init; }
 
-    public string CarId { get; set; }
+    public required int RefilledLiters { get; init; }
 
-    public int RefilledLiters { get; set; }
+    public required Decimal Price { get; init; }
 
-    public Decimal Price { get; set; }
+    [JsonIgnore]
+    public CarEntity Car { get; init; }
 }

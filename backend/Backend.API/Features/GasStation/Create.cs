@@ -1,5 +1,6 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
+using Backend.DataAccess.DTO.Requests;
 using Backend.DataAccess.Entities;
 
 namespace Backend.API.Features.GasStation;
@@ -9,11 +10,11 @@ public class CreateGasStationEndpoint : IEndpoint
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/gasStation", async (
-            GasStationEntity entity,
+            CreateGasStationRequest gasStationRequest,
             GasStationCreateHandler handler,
             CancellationToken cancellationToken) =>
         {
-            return await handler.Handle(entity, cancellationToken);
+            return await handler.Handle(gasStationRequest, cancellationToken);
         }).WithTags(nameof(GasStationEntity));
     }
 }
@@ -23,14 +24,14 @@ sealed class GasStationCreateHandler(
     GasStationsService service)
 {
     public async Task<IResult> Handle(
-        GasStationEntity entity,
+        CreateGasStationRequest gasStationRequest,
         CancellationToken cancellationToken)
     {
         try
         {
-            logger.LogInformation($"Creating driver: {entity.Id}");
+            logger.LogInformation($"Creating gasStation");
 
-            await service.Create(entity, cancellationToken);
+            await service.Create(gasStationRequest, cancellationToken);
 
             return Results.Created();
         }

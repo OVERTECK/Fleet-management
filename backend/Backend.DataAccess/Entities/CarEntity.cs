@@ -5,14 +5,13 @@ namespace Backend.DataAccess.Entities;
 public sealed class CarEntity
 {
     [Key]
-    public string VIN { get; set; }
+    public required string VIN { get; init; }
 
-    [Required]
-    public string Model { get; set; }
+    public required string Model { get; init; }
 
-    public string Number { get; set; }
+    public required string Number { get; init; }
 
-    public string Status { get; set; }
+    public required string Status { get; init; }
 
-    public int TotalKM { get; set; } = 0;
+    public required int TotalKM { get; init; } = 0;
 }

@@ -12,6 +12,8 @@ public class RouteRepository(MyDbContext dbContext)
 
     public async Task<RouteEntity?> GetById(Guid id)
     {
+        await this.EnsureExists(id);
+
         return await dbContext.Routes.FindAsync(id);
     }
 
@@ -24,19 +26,29 @@ public class RouteRepository(MyDbContext dbContext)
 
     public async Task Update(RouteEntity route)
     {
+        await this.EnsureExists(route.Id);
+
         await dbContext.Routes.Where(c => c.Id == route.Id)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(c => c.Start, route.Start)
                 .SetProperty(c => c.End, route.End)
                 .SetProperty(c => c.CountKM, route.CountKM));
-
-        await dbContext.SaveChangesAsync();
     }
 
     public async Task Delete(Guid id)
     {
-        await dbContext.Routes.Where(c => c.Id == id).ExecuteDeleteAsync();
+        await this.EnsureExists(id);
 
-        await dbContext.SaveChangesAsync();
+        await dbContext.Routes.Where(c => c.Id == id).ExecuteDeleteAsync();
+    }
+
+    public async Task EnsureExists(Guid id)
+    {
+        var route = await dbContext.Routes.FindAsync(id);
+
+        if (route == null)
+        {
+            throw new NullReferenceException($"Unable to find route with id {id}");
+        }
     }
 }
