@@ -36,9 +36,18 @@ public class TargetsService(ILogger<TargetsService> logger, TargetsRepository re
         await repository.Create(target);
     }
 
-    public async Task Update(TargetEntity target)
+    public async Task Update(UpdateTargetRequest request)
     {
         logger.LogInformation($"{nameof(TargetEntity)}: Update maintenance record");
+
+        var target = new TargetEntity
+        {
+            Id = request.Id,
+            CarId = request.CarId,
+            DriverId = request.DriverId,
+            Start = request.Start,
+            End = request.End,
+        };
 
         await repository.Update(target);
     }

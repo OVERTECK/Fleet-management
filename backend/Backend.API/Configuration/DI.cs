@@ -4,6 +4,7 @@ using Backend.API.Features.Drivers;
 using Backend.API.Features.GasStation;
 using Backend.API.Features.MaintenanceRecords;
 using Backend.API.Features.Routes;
+using Backend.API.Features.Targets;
 using Backend.API.Services;
 using Backend.DataAccess;
 using Backend.DataAccess.Repositories;
@@ -93,6 +94,12 @@ public static class DI
         services.AddScoped<RoutesDeleteHandler>();
         services.AddScoped<RoutesGetAllHandler>();
         services.AddScoped<RoutesGetByIdHandler>();
+
+        services.AddScoped<TargetsCreateHandler>();
+        services.AddScoped<TargetsUpdateHandler>();
+        services.AddScoped<TargetsDeleteHandler>();
+        services.AddScoped<TargetsGetAllHandler>();
+        services.AddScoped<TargetsGetByIdHandler>();
 
         return services;
     }

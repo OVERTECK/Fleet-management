@@ -26,6 +26,8 @@ public class TargetsRepository(MyDbContext dbContext)
 
     public async Task Update(TargetEntity target)
     {
+        await this.EnsureExists(target.Id);
+
         await dbContext.Targets.Where(c => c.Id == target.Id)
             .ExecuteUpdateAsync(s => s
                 .SetProperty(c => c.CarId, target.CarId)
