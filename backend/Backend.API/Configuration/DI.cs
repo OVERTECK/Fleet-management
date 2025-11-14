@@ -5,6 +5,7 @@ using Backend.API.Features.GasStation;
 using Backend.API.Features.MaintenanceRecords;
 using Backend.API.Features.Routes;
 using Backend.API.Features.Targets;
+using Backend.API.Features.Trips;
 using Backend.API.Services;
 using Backend.DataAccess;
 using Backend.DataAccess.Repositories;
@@ -100,6 +101,12 @@ public static class DI
         services.AddScoped<TargetsDeleteHandler>();
         services.AddScoped<TargetsGetAllHandler>();
         services.AddScoped<TargetsGetByIdHandler>();
+
+        services.AddScoped<TripsCreateHandler>();
+        services.AddScoped<TripsUpdateHandler>();
+        services.AddScoped<TripsDeleteHandler>();
+        services.AddScoped<TripsGetAllHandler>();
+        services.AddScoped<TripsGetByIdHandler>();
 
         return services;
     }

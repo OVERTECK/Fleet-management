@@ -38,9 +38,20 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository reposito
         await repository.Create(trip);
     }
 
-    public async Task Update(TripEntity trip)
+    public async Task Update(UpdateTripRequest request)
     {
         logger.LogInformation($"{nameof(TripEntity)}: Update trip");
+
+        var trip = new TripEntity
+        {
+            Id = request.Id,
+            CarId = request.CarId,
+            ConsumptionLitersFuel = request.ConsumptionLitersFuel,
+            DriverId = request.DriverId,
+            TimeEnd = request.TimeEnd,
+            TimeStart = request.TimeStart,
+            TraveledKM = request.TraveledKM,
+        };
 
         await repository.Update(trip);
     }
