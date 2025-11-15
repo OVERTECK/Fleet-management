@@ -7,9 +7,9 @@ public class CostRanking : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapGet("/costRanking", async (CostRankingHandler handler) =>
+        app.MapGet("/costRanking/{count:int}", async (int count, CostRankingHandler handler) =>
         {
-            return await handler.Handle();
+            return await handler.Handle(count);
         });
     }
 }
@@ -23,9 +23,9 @@ sealed class CostRankingHandler
         _analyticsRepository = analyticsRepository;
     }
 
-    public async Task<IResult> Handle()
+    public async Task<IResult> Handle(int countRecords)
     {
-        var records = await _analyticsRepository.GetCostRanking(5);
+        var records = await _analyticsRepository.GetCostRanking(countRecords);
 
         return Results.Ok(records);
     }
