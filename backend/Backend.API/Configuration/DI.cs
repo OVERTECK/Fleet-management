@@ -1,4 +1,5 @@
 using Backend.API.EndpointsSettings;
+using Backend.API.Features.Analytics;
 using Backend.API.Features.Cars;
 using Backend.API.Features.Drivers;
 using Backend.API.Features.GasStation;
@@ -108,6 +109,8 @@ public static class DI
         services.AddScoped<TripsGetAllHandler>();
         services.AddScoped<TripsGetByIdHandler>();
 
+        services.AddScoped<CostRankingHandler>();
+
         return services;
     }
 
@@ -120,6 +123,7 @@ public static class DI
         services.AddScoped<RoutesService>();
         services.AddScoped<TargetsService>();
         services.AddScoped<TripsService>();
+        services.AddScoped<AnalyticsService>();
 
         return services;
     }
@@ -133,6 +137,7 @@ public static class DI
         services.AddScoped<RouteRepository>();
         services.AddScoped<TargetsRepository>();
         services.AddScoped<TripsRepository>();
+        services.AddScoped<AnalyticsRepository>();
 
         return services;
     }
