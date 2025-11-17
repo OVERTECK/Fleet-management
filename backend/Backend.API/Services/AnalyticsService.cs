@@ -1,3 +1,4 @@
+using Backend.DataAccess.DTO.Responses;
 using Backend.DataAccess.Repositories;
 
 namespace Backend.API.Services;
@@ -15,10 +16,10 @@ public class AnalyticsService
         _logger = logger;
     }
 
-    public async Task GetCostRankings()
+    public async Task<List<CostRankingResponse>> GetCostRankings(int countRecords)
     {
         _logger.LogInformation($"{nameof(AnalyticsService)} started");
 
-        // return _analyticsRepository.GetCostRanking(20);
+        return await _analyticsRepository.GetCostRanking(countRecords);
     }
 }

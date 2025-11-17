@@ -1,4 +1,5 @@
 using Backend.API.EndpointsSettings;
+using Backend.API.Services;
 using Backend.DataAccess.Repositories;
 
 namespace Backend.API.Features.Analytics;
@@ -16,16 +17,16 @@ public class CostRanking : IEndpoint
 
 sealed class CostRankingHandler
 {
-    private readonly AnalyticsRepository _analyticsRepository;
+    private readonly AnalyticsService _analyticsService;
 
-    public CostRankingHandler(AnalyticsRepository analyticsRepository)
+    public CostRankingHandler(AnalyticsService analyticsService)
     {
-        _analyticsRepository = analyticsRepository;
+        _analyticsService = analyticsService;
     }
 
     public async Task<IResult> Handle(int countRecords)
     {
-        var records = await _analyticsRepository.GetCostRanking(countRecords);
+        var records = await _analyticsService.GetCostRankings(countRecords);
 
         return Results.Ok(records);
     }

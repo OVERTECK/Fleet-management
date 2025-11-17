@@ -12,6 +12,8 @@ public class GasStationEntity
 
     public required Decimal Price { get; init; }
 
+    public required DateTime Date { get; init; }
+
     [JsonIgnore]
     public CarEntity Car { get; init; }
 }

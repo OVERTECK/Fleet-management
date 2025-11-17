@@ -40,17 +40,6 @@ public class AnalyticsRepository
                 FuelCost = c.Sum(c => c.Price),
             }).ToListAsync();
 
-        // var costRankingResponse = sumMaintenanceRecords.GroupJoin(sumFuelsRecords,
-        //     maintenance => maintenance.CarId,
-        //     fuel => fuel.CarId,
-        //     (maintenance, fuel) => new CostRankingResponse
-        //     {
-        //         CarId = fuel.,
-        //         FuelCost = maintenance.FuelCost,
-        //         MaintenanceCost = record1.MaintenanceCost,
-        //         TotalCost = record2.FuelCost + record1.MaintenanceCost,
-        //     }).ToList();
-
         var maintenanceDict = sumMaintenanceRecords.ToDictionary(
             x => x.CarId,
             x => x.MaintenanceCost);

@@ -27,6 +27,7 @@ public class GasStationsService(ILogger<GasStationsService> logger, GasStationsR
         var gasStation = new GasStationEntity
         {
             Id = Guid.NewGuid(),
+            Date = gasStationRequest.Date,
             CarId = gasStationRequest.CarId,
             Price = gasStationRequest.Price,
             RefilledLiters = gasStationRequest.RefilledLiters,
