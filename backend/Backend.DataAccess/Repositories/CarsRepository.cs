@@ -12,14 +12,14 @@ public sealed class CarsRepository(MyDbContext dbContext)
 
     public async Task<CarEntity?> GetByVIN(string vin)
     {
-        var seachedCar = await dbContext.Cars.FirstOrDefaultAsync(c => c.VIN == vin);
+        var searchedCar = await dbContext.Cars.FirstOrDefaultAsync(c => c.VIN == vin);
 
-        if (seachedCar == null)
+        if (searchedCar == null)
         {
             throw new NullReferenceException($"Car with vin {vin} not found");
         }
 
-        return seachedCar;
+        return searchedCar;
     }
 
     public async Task Create(CarEntity car)
@@ -63,13 +63,10 @@ public sealed class CarsRepository(MyDbContext dbContext)
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task EnsureExists(string id)
+    public async Task<bool> IsExists(string id)
     {
         var car = await dbContext.Cars.FindAsync(id);
 
-        if (car == null)
-        {
-            throw new NullReferenceException($"Unable to find car with id {id}");
-        }
+        return car != null;
     }
 }
