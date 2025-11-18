@@ -16,7 +16,7 @@
     command: redis-server --appendonly yes --requirepass admin
   postgres:
     container_name: db
-    image: postgres
+    image: postgres:latest
     restart: always
     ports:
       - "5432:5432"
