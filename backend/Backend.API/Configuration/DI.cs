@@ -28,6 +28,7 @@ public static class DI
             .AddMyHandlers()
             .AddServices()
             .AddRepositories()
+            .AddRedis(configuration)
             .AddMyDbContext(configuration)
             .AddEndpoints(typeof(DI).Assembly);
     }
@@ -153,6 +154,16 @@ public static class DI
                     .AllowAnyMethod()
                     .AllowCredentials();
             });
+        });
+
+        return services;
+    }
+
+    private static IServiceCollection AddRedis(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = configuration.GetConnectionString("Redis");
         });
 
         return services;

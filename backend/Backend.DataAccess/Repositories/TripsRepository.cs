@@ -1,13 +1,34 @@
+using System.Text.Json;
 using Backend.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 
 namespace Backend.DataAccess.Repositories;
 
-public class TripsRepository(MyDbContext dbContext)
+public class TripsRepository(
+    MyDbContext dbContext,
+    IDistributedCache cache)
 {
     public async Task<List<TripEntity>> GetAll()
     {
-        return await dbContext.Trips.ToListAsync();
+        const string cacheKey = "trips_";
+
+        var cachedData = await cache.GetStringAsync(cacheKey);
+
+        if (!string.IsNullOrEmpty(cachedData))
+        {
+            return JsonSerializer.Deserialize<List<TripEntity>>(cachedData) ?? new List<TripEntity>();
+        }
+
+        var trips = await dbContext.Trips.ToListAsync();
+
+        cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(trips), new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2),
+            SlidingExpiration = TimeSpan.FromMinutes(2),
+        });
+
+        return trips;
     }
 
     public async Task<TripEntity?> GetById(Guid id)
