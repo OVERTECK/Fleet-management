@@ -4,4 +4,27 @@
     build:
       context: .
       dockerfile: Backend.API/Dockerfile
+  redis:
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis_data:/data
+    environment:
+      REDIS_PASSWORD: admin
+    command: redis-server --appendonly yes --requirepass admin
+  postgres:
+    container_name: db
+    image: postgres
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: admin
+      POSTGRES_USER: admin
+      POSTGRES_DB: postgres
+      PGDATA: ./pgdata
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data/pgdata
 
