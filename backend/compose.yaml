@@ -15,7 +15,6 @@
       REDIS_PASSWORD: admin
     command: redis-server --appendonly yes --requirepass admin
   postgres:
-    container_name: db
     image: postgres:latest
     restart: always
     ports:
