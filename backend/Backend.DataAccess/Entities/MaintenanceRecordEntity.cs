@@ -13,4 +13,6 @@ public class MaintenanceRecordEntity
     public required string TypeWork { get; init; }
 
     public required Decimal Price { get; init; }
+    
+    public required DateTime Date { get; init; }
 }

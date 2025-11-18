@@ -9,4 +9,6 @@ public class UpdateMaintenanceRecordRequest
     public required string TypeWork { get; set; }
 
     public required Decimal Price { get; set; }
+    
+    public required DateTime Date { get; set; }
 }

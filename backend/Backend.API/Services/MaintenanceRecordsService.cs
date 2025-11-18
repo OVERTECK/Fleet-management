@@ -27,6 +27,7 @@ public class MaintenanceRecordsService(MaintenanceRecordsRepository repository, 
         var maintenanceRecord = new MaintenanceRecordEntity
         {
             Id = Guid.NewGuid(),
+            Date = request.Date,
             Price = request.Price,
             CarId = request.CarId,
             TypeWork = request.TypeWork,
@@ -42,6 +43,7 @@ public class MaintenanceRecordsService(MaintenanceRecordsRepository repository, 
         var maintenanceRecord = new MaintenanceRecordEntity
         {
             Id = maintenanceRecordRequest.Id,
+            Date = maintenanceRecordRequest.Date,
             Price = maintenanceRecordRequest.Price,
             CarId = maintenanceRecordRequest.CarId,
             TypeWork = maintenanceRecordRequest.TypeWork,
