@@ -131,6 +131,23 @@ namespace Backend.DataAccess.Migrations
                     b.ToTable("MaintenanceRecords");
                 });
 
+            modelBuilder.Entity("Backend.DataAccess.Entities.RoleEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
+                });
+
             modelBuilder.Entity("Backend.DataAccess.Entities.RouteEntity", b =>
                 {
                     b.Property<Guid>("Id")
@@ -213,6 +230,30 @@ namespace Backend.DataAccess.Migrations
                     b.ToTable("Trips");
                 });
 
+            modelBuilder.Entity("Backend.DataAccess.Entities.UserEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Login")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("Backend.DataAccess.Entities.GasStationEntity", b =>
                 {
                     b.HasOne("Backend.DataAccess.Entities.CarEntity", "Car")
@@ -271,6 +312,17 @@ namespace Backend.DataAccess.Migrations
                     b.Navigation("Car");
 
                     b.Navigation("Driver");
+                });
+
+            modelBuilder.Entity("Backend.DataAccess.Entities.UserEntity", b =>
+                {
+                    b.HasOne("Backend.DataAccess.Entities.RoleEntity", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 #pragma warning restore 612, 618
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
@@ -43,6 +44,19 @@ namespace Backend.DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Roles",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Title = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Roles", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Routes",
                 columns: table => new
                 {
@@ -61,18 +75,20 @@ namespace Backend.DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CarVIN = table.Column<string>(type: "text", nullable: true),
+                    CarId = table.Column<string>(type: "text", nullable: false),
                     RefilledLiters = table.Column<int>(type: "integer", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false)
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_GasStations", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_GasStations_Cars_CarVIN",
-                        column: x => x.CarVIN,
+                        name: "FK_GasStations_Cars_CarId",
+                        column: x => x.CarId,
                         principalTable: "Cars",
-                        principalColumn: "VIN");
+                        principalColumn: "VIN",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -80,18 +96,20 @@ namespace Backend.DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CarVIN = table.Column<string>(type: "text", nullable: true),
+                    CarId = table.Column<string>(type: "text", nullable: false),
                     TypeWork = table.Column<string>(type: "text", nullable: false),
-                    Price = table.Column<decimal>(type: "numeric", nullable: false)
+                    Price = table.Column<decimal>(type: "numeric", nullable: false),
+                    Date = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MaintenanceRecords", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MaintenanceRecords_Cars_CarVIN",
-                        column: x => x.CarVIN,
+                        name: "FK_MaintenanceRecords_Cars_CarId",
+                        column: x => x.CarId,
                         principalTable: "Cars",
-                        principalColumn: "VIN");
+                        principalColumn: "VIN",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -99,7 +117,7 @@ namespace Backend.DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CarVIN = table.Column<string>(type: "text", nullable: true),
+                    CarId = table.Column<string>(type: "text", nullable: false),
                     DriverId = table.Column<Guid>(type: "uuid", nullable: false),
                     Start = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     End = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
@@ -108,10 +126,11 @@ namespace Backend.DataAccess.Migrations
                 {
                     table.PrimaryKey("PK_Targets", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Targets_Cars_CarVIN",
-                        column: x => x.CarVIN,
+                        name: "FK_Targets_Cars_CarId",
+                        column: x => x.CarId,
                         principalTable: "Cars",
-                        principalColumn: "VIN");
+                        principalColumn: "VIN",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Targets_Drivers_DriverId",
                         column: x => x.DriverId,
@@ -125,7 +144,7 @@ namespace Backend.DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    CarVIN = table.Column<string>(type: "text", nullable: true),
+                    CarId = table.Column<string>(type: "text", nullable: false),
                     DriverId = table.Column<Guid>(type: "uuid", nullable: false),
                     TimeStart = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     TimeEnd = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -136,10 +155,11 @@ namespace Backend.DataAccess.Migrations
                 {
                     table.PrimaryKey("PK_Trips", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Trips_Cars_CarVIN",
-                        column: x => x.CarVIN,
+                        name: "FK_Trips_Cars_CarId",
+                        column: x => x.CarId,
                         principalTable: "Cars",
-                        principalColumn: "VIN");
+                        principalColumn: "VIN",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Trips_Drivers_DriverId",
                         column: x => x.DriverId,
@@ -148,20 +168,40 @@ namespace Backend.DataAccess.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Users",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Login = table.Column<string>(type: "text", nullable: false),
+                    Password = table.Column<string>(type: "text", nullable: false),
+                    RoleId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Users_Roles_RoleId",
+                        column: x => x.RoleId,
+                        principalTable: "Roles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
-                name: "IX_GasStations_CarVIN",
+                name: "IX_GasStations_CarId",
                 table: "GasStations",
-                column: "CarVIN");
+                column: "CarId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MaintenanceRecords_CarVIN",
+                name: "IX_MaintenanceRecords_CarId",
                 table: "MaintenanceRecords",
-                column: "CarVIN");
+                column: "CarId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Targets_CarVIN",
+                name: "IX_Targets_CarId",
                 table: "Targets",
-                column: "CarVIN");
+                column: "CarId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Targets_DriverId",
@@ -169,14 +209,19 @@ namespace Backend.DataAccess.Migrations
                 column: "DriverId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Trips_CarVIN",
+                name: "IX_Trips_CarId",
                 table: "Trips",
-                column: "CarVIN");
+                column: "CarId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Trips_DriverId",
                 table: "Trips",
                 column: "DriverId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Users_RoleId",
+                table: "Users",
+                column: "RoleId");
         }
 
         /// <inheritdoc />
@@ -198,10 +243,16 @@ namespace Backend.DataAccess.Migrations
                 name: "Trips");
 
             migrationBuilder.DropTable(
+                name: "Users");
+
+            migrationBuilder.DropTable(
                 name: "Cars");
 
             migrationBuilder.DropTable(
                 name: "Drivers");
+
+            migrationBuilder.DropTable(
+                name: "Roles");
         }
     }
 }

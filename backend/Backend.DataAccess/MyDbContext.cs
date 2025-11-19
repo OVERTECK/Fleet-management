@@ -19,6 +19,10 @@ public class MyDbContext(DbContextOptions<MyDbContext> options) : DbContext(opti
 
     public DbSet<TripEntity> Trips { get; set; }
 
+    public DbSet<UserEntity> Users { get; set; }
+
+    public DbSet<RoleEntity> Roles { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

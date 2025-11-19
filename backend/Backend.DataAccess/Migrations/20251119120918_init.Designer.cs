@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Backend.DataAccess.Migrations
 {
     [DbContext(typeof(MyDbContext))]
-    [Migration("20251028182930_addIdForeignKeys")]
-    partial class addIdForeignKeys
+    [Migration("20251119120918_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -91,6 +91,9 @@ namespace Backend.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
@@ -114,6 +117,9 @@ namespace Backend.DataAccess.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<decimal>("Price")
                         .HasColumnType("numeric");
 
@@ -126,6 +132,23 @@ namespace Backend.DataAccess.Migrations
                     b.HasIndex("CarId");
 
                     b.ToTable("MaintenanceRecords");
+                });
+
+            modelBuilder.Entity("Backend.DataAccess.Entities.RoleEntity", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Roles");
                 });
 
             modelBuilder.Entity("Backend.DataAccess.Entities.RouteEntity", b =>
@@ -210,6 +233,30 @@ namespace Backend.DataAccess.Migrations
                     b.ToTable("Trips");
                 });
 
+            modelBuilder.Entity("Backend.DataAccess.Entities.UserEntity", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Login")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Password")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("RoleId");
+
+                    b.ToTable("Users");
+                });
+
             modelBuilder.Entity("Backend.DataAccess.Entities.GasStationEntity", b =>
                 {
                     b.HasOne("Backend.DataAccess.Entities.CarEntity", "Car")
@@ -268,6 +315,17 @@ namespace Backend.DataAccess.Migrations
                     b.Navigation("Car");
 
                     b.Navigation("Driver");
+                });
+
+            modelBuilder.Entity("Backend.DataAccess.Entities.UserEntity", b =>
+                {
+                    b.HasOne("Backend.DataAccess.Entities.RoleEntity", "Role")
+                        .WithMany()
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Role");
                 });
 #pragma warning restore 612, 618
         }
