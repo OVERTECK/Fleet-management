@@ -17,6 +17,10 @@ public class TargetsService(ILogger<TargetsService> logger, TargetsRepository re
     {
         logger.LogInformation($"{nameof(TargetEntity)}: Get maintenance records by id");
 
+        var logTarget = $"{nameof(GetById)};{id}";
+
+        await File.AppendAllTextAsync($"../logs/{nameof(TargetsService)}.csv", logTarget);
+
         return await repository.GetById(id);
     }
 
@@ -32,6 +36,15 @@ public class TargetsService(ILogger<TargetsService> logger, TargetsRepository re
             Start = request.Start,
             End = request.End,
         };
+
+        var logTarget = $"{nameof(Create)};"+
+                        $"{target.Id};" +
+                        $"{target.DriverId};" +
+                        $"{target.CarId};" +
+                        $"{target.Start};" +
+                        $"{target.End}\n";
+
+        await File.AppendAllTextAsync($"../logs/{nameof(TargetsService)}.csv", logTarget);
 
         await repository.Create(target);
     }
@@ -49,12 +62,25 @@ public class TargetsService(ILogger<TargetsService> logger, TargetsRepository re
             End = request.End,
         };
 
+        var logTarget = $"{nameof(Update)};"+
+                        $"{target.Id};" +
+                        $"{target.DriverId};" +
+                        $"{target.CarId};" +
+                        $"{target.Start};" +
+                        $"{target.End}\n";
+
+        await File.AppendAllTextAsync($"../logs/{nameof(TargetsService)}.csv", logTarget);
+
         await repository.Update(target);
     }
 
     public async Task Delete(Guid id)
     {
         logger.LogInformation($"{nameof(TargetEntity)}: Delete maintenance record");
+
+        var logTarget = $"{nameof(Delete)};{id}\n";
+
+        await File.AppendAllTextAsync($"../logs/{nameof(TargetsService)}.csv", logTarget);
 
         await repository.Delete(id);
     }
