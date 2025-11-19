@@ -24,4 +24,4 @@ Desktop.ini
 
 redis_data/
 pgdata/
-logs/*
+*.csv
