@@ -17,6 +17,10 @@ public class MaintenanceRecordsService(MaintenanceRecordsRepository repository, 
     {
         logger.LogInformation($"{nameof(MaintenanceRecordEntity)}: Get maintenance records by id");
 
+        var logMaintenanceRecord = $"{nameof(GetById)};{id}\n";
+
+        await File.AppendAllTextAsync("../logs/maintenanceRecords.csv", logMaintenanceRecord, cancellationToken);
+
         return await repository.GetById(id, cancellationToken);
     }
 
@@ -32,6 +36,15 @@ public class MaintenanceRecordsService(MaintenanceRecordsRepository repository, 
             CarId = request.CarId,
             TypeWork = request.TypeWork,
         };
+
+        var logMaintenanceRecord = $"{nameof(Create)};"+
+                                   $"{maintenanceRecord.Id};" +
+                                   $"{maintenanceRecord.Date};" +
+                                   $"{maintenanceRecord.Price};" +
+                                   $"{maintenanceRecord.CarId};" +
+                                   $"{maintenanceRecord.TypeWork}\n";
+
+        await File.AppendAllTextAsync("../logs/maintenanceRecords.csv", logMaintenanceRecord, cancellationToken);
 
         await repository.Create(maintenanceRecord, cancellationToken);
     }
@@ -49,12 +62,25 @@ public class MaintenanceRecordsService(MaintenanceRecordsRepository repository, 
             TypeWork = maintenanceRecordRequest.TypeWork,
         };
 
+        var logMaintenanceRecord = $"{nameof(Update)};"+
+                                   $"{maintenanceRecord.Id};" +
+                                   $"{maintenanceRecord.Date};" +
+                                   $"{maintenanceRecord.Price};" +
+                                   $"{maintenanceRecord.CarId};" +
+                                   $"{maintenanceRecord.TypeWork}\n";
+
+        await File.AppendAllTextAsync("../logs/maintenanceRecords.csv", logMaintenanceRecord, cancellationToken);
+
         await repository.Update(maintenanceRecord, cancellationToken);
     }
 
     public async Task Delete(Guid id, CancellationToken cancellationToken)
     {
         logger.LogInformation($"{nameof(MaintenanceRecordEntity)}: Delete maintenance record");
+
+        var logMaintenanceRecord = $"{nameof(Delete)};{id}\n";
+
+        await File.AppendAllTextAsync("../logs/maintenanceRecords.csv", logMaintenanceRecord, cancellationToken);
 
         await repository.Delete(id, cancellationToken);
     }
