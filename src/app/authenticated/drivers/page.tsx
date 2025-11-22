@@ -17,22 +17,21 @@ import {
     DialogTitle,
     DialogContent,
     Chip,
+    Alert,
+    Snackbar,
 } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
-import { Driver } from '@/types';
+import { Driver, CreateDriverRequest } from '@/types';
 import { driverService } from '@/services/driverService';
 import DriverForm from '@/components/forms/DriverForm';
-
-// Категории прав с иконками
-const licenseCategories = [
-    'A', 'A1', 'B', 'B1', 'C', 'C1', 'D', 'D1', 'BE', 'CE', 'C1E', 'DE', 'D1E', 'M', 'Tm', 'Tb'
-];
 
 export default function DriversPage() {
     const [drivers, setDrivers] = useState<Driver[]>([]);
     const [open, setOpen] = useState(false);
     const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
     useEffect(() => {
         loadDrivers();
@@ -42,10 +41,11 @@ export default function DriversPage() {
         try {
             setLoading(true);
             const data = await driverService.getAll();
+            console.log('Loaded drivers:', data);
             setDrivers(data);
         } catch (error) {
             console.error('Error loading drivers:', error);
-            alert('Ошибка загрузки водителей');
+            setError('Ошибка загрузки водителей');
         } finally {
             setLoading(false);
         }
@@ -65,10 +65,11 @@ export default function DriversPage() {
         if (confirm('Вы уверены, что хотите удалить этого водителя?')) {
             try {
                 await driverService.delete(id);
+                setSuccess('Водитель успешно удален');
                 loadDrivers();
             } catch (error) {
                 console.error('Error deleting driver:', error);
-                alert('Ошибка удаления водителя');
+                setError('Ошибка удаления водителя');
             }
         }
     };
@@ -78,37 +79,38 @@ export default function DriversPage() {
         setSelectedDriver(null);
     };
 
-    const handleSubmit = async (driverData: any) => {
+    const handleSubmit = async (driverData: CreateDriverRequest) => {
+        console.log('Submitting driver data:', driverData);
         try {
             if (selectedDriver) {
-                await driverService.update({ ...selectedDriver, ...driverData });
-            } else {
-                await driverService.create({
-                    ...driverData,
-                    id: undefined // ID сгенерируется на бэкенде
+                // При обновлении отправляем полный объект Driver
+                await driverService.update({
+                    ...selectedDriver,
+                    ...driverData
                 });
+                setSuccess('Водитель успешно обновлен');
+            } else {
+                // При создании отправляем CreateDriverRequest
+                await driverService.create(driverData);
+                setSuccess('Водитель успешно создан');
             }
             handleClose();
             loadDrivers();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving driver:', error);
-            alert('Ошибка сохранения водителя');
+            const errorMessage = error.response?.data || error.message || 'Неизвестная ошибка';
+            setError(`Ошибка сохранения водителя: ${errorMessage}`);
         }
+    };
+
+    const handleCloseSnackbar = () => {
+        setError(null);
+        setSuccess(null);
     };
 
     // Функция для форматирования ФИО
     const formatFullName = (driver: Driver) => {
-        return `${driver.lastName} ${driver.name} ${driver.patronymic || ''}`.trim();
-    };
-
-    // Функция для форматирования контактных данных
-    const formatContactData = (contactData: string) => {
-        // Простая валидация - если это номер телефона, форматируем
-        const phoneRegex = /^[\d\+\(\)\s-]+$/;
-        if (phoneRegex.test(contactData)) {
-            return contactData.replace(/(\d{1})(\d{3})(\d{3})(\d{2})(\d{2})/, '+$1 ($2) $3-$4-$5');
-        }
-        return contactData;
+        return `${driver.lastName} ${driver.name} ${driver.pathronymic || ''}`.trim();
     };
 
     if (loading) {
@@ -172,7 +174,7 @@ export default function DriversPage() {
                                     </TableCell>
                                     <TableCell>
                                         <Typography variant="body2">
-                                            {formatContactData(driver.contactData)}
+                                            {driver.contactData}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
@@ -219,6 +221,19 @@ export default function DriversPage() {
                     <DriverForm driver={selectedDriver} onSubmit={handleSubmit} onCancel={handleClose} />
                 </DialogContent>
             </Dialog>
+
+            {/* Уведомления об ошибках и успехе */}
+            <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {error}
+                </Alert>
+            </Snackbar>
+
+            <Snackbar open={!!success} autoHideDuration={3000} onClose={handleCloseSnackbar}>
+                <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+                    {success}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }

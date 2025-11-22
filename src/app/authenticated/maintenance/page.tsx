@@ -17,6 +17,8 @@ import {
     DialogTitle,
     DialogContent,
     Chip,
+    Alert,
+    Snackbar,
 } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
 import { MaintenanceRecord } from '@/types';
@@ -28,6 +30,8 @@ export default function MaintenancePage() {
     const [open, setOpen] = useState(false);
     const [selectedRecord, setSelectedRecord] = useState<MaintenanceRecord | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
     useEffect(() => {
         loadRecords();
@@ -40,7 +44,7 @@ export default function MaintenancePage() {
             setRecords(data);
         } catch (error) {
             console.error('Error loading maintenance records:', error);
-            alert('Ошибка загрузки записей ТО');
+            setError('Ошибка загрузки записей ТО');
         } finally {
             setLoading(false);
         }
@@ -60,10 +64,11 @@ export default function MaintenancePage() {
         if (confirm('Вы уверены, что хотите удалить эту запись ТО?')) {
             try {
                 await maintenanceService.delete(id);
+                setSuccess('Запись ТО успешно удалена');
                 loadRecords();
             } catch (error) {
                 console.error('Error deleting maintenance record:', error);
-                alert('Ошибка удаления записи ТО');
+                setError('Ошибка удаления записи ТО');
             }
         }
     };
@@ -77,18 +82,23 @@ export default function MaintenancePage() {
         try {
             if (selectedRecord) {
                 await maintenanceService.update({ ...selectedRecord, ...recordData });
+                setSuccess('Запись ТО успешно обновлена');
             } else {
-                await maintenanceService.create({
-                    ...recordData,
-                    id: undefined
-                });
+                await maintenanceService.create(recordData);
+                setSuccess('Запись ТО успешно создана');
             }
             handleClose();
             loadRecords();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving maintenance record:', error);
-            alert('Ошибка сохранения записи ТО');
+            const errorMessage = error.response?.data || error.message || 'Неизвестная ошибка';
+            setError(`Ошибка сохранения записи ТО: ${errorMessage}`);
         }
+    };
+
+    const handleCloseSnackbar = () => {
+        setError(null);
+        setSuccess(null);
     };
 
     if (loading) {
@@ -155,6 +165,9 @@ export default function MaintenancePage() {
                                         <Typography variant="body2">
                                             {new Date(record.date).toLocaleDateString('ru-RU')}
                                         </Typography>
+                                        <Typography variant="body2" color="textSecondary">
+                                            {new Date(record.date).toLocaleTimeString('ru-RU')}
+                                        </Typography>
                                     </TableCell>
                                     <TableCell>
                                         <Chip
@@ -194,6 +207,19 @@ export default function MaintenancePage() {
                     <MaintenanceForm record={selectedRecord} onSubmit={handleSubmit} onCancel={handleClose} />
                 </DialogContent>
             </Dialog>
+
+            {/* Уведомления об ошибках и успехе */}
+            <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {error}
+                </Alert>
+            </Snackbar>
+
+            <Snackbar open={!!success} autoHideDuration={3000} onClose={handleCloseSnackbar}>
+                <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+                    {success}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }

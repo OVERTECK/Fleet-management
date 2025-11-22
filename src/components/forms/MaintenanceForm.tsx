@@ -12,12 +12,12 @@ import {
     InputLabel,
     Select,
 } from '@mui/material';
-import { MaintenanceRecord, Car } from '@/types';
+import { MaintenanceRecord, Car, CreateMaintenanceRecordRequest } from '@/types';
 import { carService } from '@/services/carService';
 
 interface MaintenanceFormProps {
     record?: MaintenanceRecord | null;
-    onSubmit: (data: any) => void;
+    onSubmit: (data: CreateMaintenanceRecordRequest) => void;
     onCancel: () => void;
 }
 
@@ -43,18 +43,23 @@ export default function MaintenanceForm({ record, onSubmit, onCancel }: Maintena
         handleSubmit,
         reset,
         formState: { errors, isSubmitting }
-    } = useForm();
+    } = useForm<CreateMaintenanceRecordRequest>();
 
     const [cars, setCars] = useState<Car[]>([]);
 
     useEffect(() => {
         loadCars();
+
         if (record) {
+            // При редактировании
             reset({
-                ...record,
-                date: record.date.split('T')[0],
+                carId: record.carId,
+                typeWork: record.typeWork,
+                price: record.price,
+                date: record.date.split('T')[0], // Безопасно обрабатываем дату
             });
         } else {
+            // При создании - текущая дата
             reset({
                 carId: '',
                 typeWork: '',
@@ -63,6 +68,12 @@ export default function MaintenanceForm({ record, onSubmit, onCancel }: Maintena
             });
         }
     }, [record, reset]);
+
+    // Функция для преобразования в формат бэкенда
+    const formatDateForBackend = (dateString: string): string => {
+        const date = new Date(dateString);
+        return date.toISOString();
+    };
 
     const loadCars = async () => {
         try {
@@ -73,11 +84,21 @@ export default function MaintenanceForm({ record, onSubmit, onCancel }: Maintena
         }
     };
 
+    const handleFormSubmit = (data: CreateMaintenanceRecordRequest) => {
+        // Преобразуем даты в формат бэкенда перед отправкой
+        const formattedData = {
+            ...data,
+            date: formatDateForBackend(data.date),
+        };
+        console.log('Formatted maintenance data for backend:', formattedData);
+        onSubmit(formattedData);
+    };
+
     return (
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 2 }}>
+        <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} sx={{ mt: 2 }}>
             <Grid container spacing={3}>
                 <Grid size={{ xs: 12, sm: 6 }}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!!errors.carId}>
                         <InputLabel id="car-select-label">Автомобиль</InputLabel>
                         <Select
                             labelId="car-select-label"
@@ -101,7 +122,7 @@ export default function MaintenanceForm({ record, onSubmit, onCancel }: Maintena
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6 }}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!!errors.typeWork}>
                         <InputLabel id="work-type-label">Вид работ</InputLabel>
                         <Select
                             labelId="work-type-label"
@@ -129,7 +150,11 @@ export default function MaintenanceForm({ record, onSubmit, onCancel }: Maintena
                         fullWidth
                         type="date"
                         label="Дата выполнения"
-                        InputLabelProps={{ shrink: true }}
+                        slotProps={{
+                            inputLabel: {
+                                shrink: true
+                            }
+                        }}
                         {...register('date', { required: 'Дата обязательна' })}
                         error={!!errors.date}
                         helperText={errors.date?.message as string}
@@ -141,9 +166,15 @@ export default function MaintenanceForm({ record, onSubmit, onCancel }: Maintena
                         fullWidth
                         type="number"
                         label="Стоимость (₽)"
+                        slotProps={{
+                            input: {
+                                inputProps: { min: 0, step: 0.01 }
+                            }
+                        }}
                         {...register('price', {
                             required: 'Стоимость обязательна',
                             min: { value: 0, message: 'Стоимость не может быть отрицательной' },
+                            valueAsNumber: true,
                         })}
                         error={!!errors.price}
                         helperText={errors.price?.message as string}

@@ -76,11 +76,14 @@ export default function AssignmentsPage() {
     const handleSubmit = async (assignmentData: any) => {
         try {
             if (selectedAssignment) {
-                await assignmentService.update({ ...selectedAssignment, ...assignmentData });
+                await assignmentService.update({
+                    ...selectedAssignment,
+                    ...assignmentData
+                });
             } else {
                 await assignmentService.create({
                     ...assignmentData,
-                    id: undefined
+                    id: undefined // ID сгенерируется на бэкенде
                 });
             }
             handleClose();
@@ -200,7 +203,11 @@ export default function AssignmentsPage() {
                     {selectedAssignment ? '✏️ Редактировать назначение' : '➕ Добавить назначение'}
                 </DialogTitle>
                 <DialogContent>
-                    <AssignmentForm assignment={selectedAssignment} onSubmit={handleSubmit} onCancel={handleClose} />
+                    <AssignmentForm
+                        assignment={selectedAssignment}
+                        onSubmit={handleSubmit}
+                        onCancel={handleClose}
+                    />
                 </DialogContent>
             </Dialog>
         </Box>

@@ -17,9 +17,11 @@ import {
     DialogTitle,
     DialogContent,
     Chip,
+    Alert,
+    Snackbar,
 } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
-import { Trip } from '@/types';
+import { Trip, CreateTripRequest } from '@/types';
 import { tripService } from '@/services/tripService';
 import TripForm from '@/components/forms/TripForm';
 
@@ -28,6 +30,8 @@ export default function TripsPage() {
     const [open, setOpen] = useState(false);
     const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
     useEffect(() => {
         loadTrips();
@@ -40,7 +44,7 @@ export default function TripsPage() {
             setTrips(data);
         } catch (error) {
             console.error('Error loading trips:', error);
-            alert('Ошибка загрузки поездок');
+            setError('Ошибка загрузки поездок');
         } finally {
             setLoading(false);
         }
@@ -60,10 +64,11 @@ export default function TripsPage() {
         if (confirm('Вы уверены, что хотите удалить эту поездку?')) {
             try {
                 await tripService.delete(id);
+                setSuccess('Поездка успешно удалена');
                 loadTrips();
             } catch (error) {
                 console.error('Error deleting trip:', error);
-                alert('Ошибка удаления поездки');
+                setError('Ошибка удаления поездки');
             }
         }
     };
@@ -73,22 +78,31 @@ export default function TripsPage() {
         setSelectedTrip(null);
     };
 
-    const handleSubmit = async (tripData: any) => {
+    const handleSubmit = async (tripData: CreateTripRequest) => {
+        console.log('Submitting trip data:', tripData);
         try {
             if (selectedTrip) {
-                await tripService.update({ ...selectedTrip, ...tripData });
-            } else {
-                await tripService.create({
-                    ...tripData,
-                    id: undefined
+                await tripService.update({
+                    ...selectedTrip,
+                    ...tripData
                 });
+                setSuccess('Поездка успешно обновлена');
+            } else {
+                await tripService.create(tripData);
+                setSuccess('Поездка успешно создана');
             }
             handleClose();
             loadTrips();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving trip:', error);
-            alert('Ошибка сохранения поездки');
+            const errorMessage = error.response?.data || error.message || 'Неизвестная ошибка';
+            setError(`Ошибка сохранения поездки: ${errorMessage}`);
         }
+    };
+
+    const handleCloseSnackbar = () => {
+        setError(null);
+        setSuccess(null);
     };
 
     // Расчет расхода топлива на 100км
@@ -213,6 +227,19 @@ export default function TripsPage() {
                     <TripForm trip={selectedTrip} onSubmit={handleSubmit} onCancel={handleClose} />
                 </DialogContent>
             </Dialog>
+
+            {/* Уведомления об ошибках и успехе */}
+            <Snackbar open={!!error} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+                <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+                    {error}
+                </Alert>
+            </Snackbar>
+
+            <Snackbar open={!!success} autoHideDuration={3000} onClose={handleCloseSnackbar}>
+                <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+                    {success}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }

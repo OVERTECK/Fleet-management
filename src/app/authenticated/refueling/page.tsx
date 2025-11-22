@@ -17,6 +17,8 @@ import {
     DialogTitle,
     DialogContent,
     Chip,
+    Alert,
+    Snackbar,
 } from '@mui/material';
 import { Edit, Delete, Add } from '@mui/icons-material';
 import { Refueling } from '@/types';
@@ -28,6 +30,8 @@ export default function RefuelingPage() {
     const [open, setOpen] = useState(false);
     const [selectedRefueling, setSelectedRefueling] = useState<Refueling | null>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [success, setSuccess] = useState<string | null>(null);
 
     useEffect(() => {
         loadRefuelings();
@@ -36,11 +40,14 @@ export default function RefuelingPage() {
     const loadRefuelings = async () => {
         try {
             setLoading(true);
+            setError(null);
             const data = await refuelingService.getAll();
             setRefuelings(data);
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error loading refuelings:', error);
-            alert('Ошибка загрузки заправок');
+            const errorMessage = error.response?.data?.message || error.message || 'Ошибка загрузки заправок';
+            setError(`Ошибка загрузки заправок: ${errorMessage}`);
+            setRefuelings([]); // Устанавливаем пустой массив в случае ошибки
         } finally {
             setLoading(false);
         }
@@ -60,10 +67,12 @@ export default function RefuelingPage() {
         if (confirm('Вы уверены, что хотите удалить эту запись о заправке?')) {
             try {
                 await refuelingService.delete(id);
+                setSuccess('Заправка успешно удалена');
                 loadRefuelings();
-            } catch (error) {
+            } catch (error: any) {
                 console.error('Error deleting refueling:', error);
-                alert('Ошибка удаления записи о заправке');
+                const errorMessage = error.response?.data?.message || error.message || 'Неизвестная ошибка';
+                setError(`Ошибка удаления заправки: ${errorMessage}`);
             }
         }
     };
@@ -77,18 +86,23 @@ export default function RefuelingPage() {
         try {
             if (selectedRefueling) {
                 await refuelingService.update({ ...selectedRefueling, ...refuelingData });
+                setSuccess('Заправка успешно обновлена');
             } else {
-                await refuelingService.create({
-                    ...refuelingData,
-                    id: undefined
-                });
+                await refuelingService.create(refuelingData);
+                setSuccess('Заправка успешно создана');
             }
             handleClose();
             loadRefuelings();
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error saving refueling:', error);
-            alert('Ошибка сохранения записи о заправке');
+            const errorMessage = error.response?.data?.message || error.message || 'Неизвестная ошибка';
+            setError(`Ошибка сохранения заправки: ${errorMessage}`);
         }
+    };
+
+    const handleCloseSnackbar = () => {
+        setError(null);
+        setSuccess(null);
     };
 
     // Расчет стоимости за литр
@@ -118,13 +132,19 @@ export default function RefuelingPage() {
                 </Button>
             </Box>
 
+            {error && (
+                <Alert severity="error" sx={{ mb: 2 }}>
+                    {error}
+                </Alert>
+            )}
+
             {refuelings.length === 0 ? (
                 <Paper sx={{ p: 4, textAlign: 'center' }}>
                     <Typography variant="h6" color="textSecondary" gutterBottom>
-                        Заправки не найдены
+                        {error ? 'Не удалось загрузить заправки' : 'Заправки не найдены'}
                     </Typography>
                     <Typography color="textSecondary" sx={{ mb: 2 }}>
-                        Добавьте первую запись о заправке
+                        {error ? 'Попробуйте обновить страницу' : 'Добавьте первую запись о заправке'}
                     </Typography>
                     <Button
                         variant="contained"
@@ -156,6 +176,9 @@ export default function RefuelingPage() {
                                     <TableCell>
                                         <Typography variant="body2">
                                             {new Date(refueling.date).toLocaleDateString('ru-RU')}
+                                        </Typography>
+                                        <Typography variant="body2" color="textSecondary">
+                                            {new Date(refueling.date).toLocaleTimeString('ru-RU')}
                                         </Typography>
                                     </TableCell>
                                     <TableCell>
@@ -206,6 +229,13 @@ export default function RefuelingPage() {
                     <RefuelingForm refueling={selectedRefueling} onSubmit={handleSubmit} onCancel={handleClose} />
                 </DialogContent>
             </Dialog>
+
+            {/* Уведомления об ошибках и успехе */}
+            <Snackbar open={!!success} autoHideDuration={3000} onClose={handleCloseSnackbar}>
+                <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
+                    {success}
+                </Alert>
+            </Snackbar>
         </Box>
     );
 }

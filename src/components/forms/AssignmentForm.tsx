@@ -37,7 +37,8 @@ export default function AssignmentForm({ assignment, onSubmit, onCancel }: Assig
         loadCarsAndDrivers();
         if (assignment) {
             reset({
-                ...assignment,
+                carId: assignment.carId,
+                driverId: assignment.driverId,
                 start: assignment.start.split('T')[0],
                 end: assignment.end.split('T')[0],
             });
@@ -54,6 +55,11 @@ export default function AssignmentForm({ assignment, onSubmit, onCancel }: Assig
         }
     }, [assignment, reset]);
 
+    const formatDateForBackend = (dateString: string): string => {
+        const date = new Date(dateString);
+        return date.toISOString();
+    };
+
     const loadCarsAndDrivers = async () => {
         try {
             const [carsData, driversData] = await Promise.all([
@@ -67,18 +73,27 @@ export default function AssignmentForm({ assignment, onSubmit, onCancel }: Assig
         }
     };
 
+    const handleFormSubmit = (data: any) => {
+        const formattedData = {
+            ...data,
+            start: formatDateForBackend(data.start),
+            end: formatDateForBackend(data.end),
+        };
+        console.log('Formatted assignment data for backend:', formattedData);
+        onSubmit(formattedData);
+    };
+
     return (
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 2 }}>
+        <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} sx={{ mt: 2 }}>
             <Grid container spacing={3}>
                 <Grid size={{ xs: 12, sm: 6 }}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!!errors.carId}>
                         <InputLabel id="car-select-label">Автомобиль</InputLabel>
                         <Select
                             labelId="car-select-label"
                             label="Автомобиль"
                             defaultValue={assignment?.carId || ''}
                             {...register('carId', { required: 'Выберите автомобиль' })}
-                            error={!!errors.carId}
                         >
                             {cars.map((car) => (
                                 <MenuItem key={car.vin} value={car.vin}>
@@ -95,18 +110,17 @@ export default function AssignmentForm({ assignment, onSubmit, onCancel }: Assig
                 </Grid>
 
                 <Grid size={{ xs: 12, sm: 6 }}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!!errors.driverId}>
                         <InputLabel id="driver-select-label">Водитель</InputLabel>
                         <Select
                             labelId="driver-select-label"
                             label="Водитель"
                             defaultValue={assignment?.driverId || ''}
                             {...register('driverId', { required: 'Выберите водителя' })}
-                            error={!!errors.driverId}
                         >
                             {drivers.map((driver) => (
                                 <MenuItem key={driver.id} value={driver.id}>
-                                    {driver.lastName} {driver.name} {driver.patronymic}
+                                    {driver.lastName} {driver.name} {driver.pathronymic || ''}
                                 </MenuItem>
                             ))}
                         </Select>
@@ -123,7 +137,11 @@ export default function AssignmentForm({ assignment, onSubmit, onCancel }: Assig
                         fullWidth
                         type="date"
                         label="Дата начала"
-                        InputLabelProps={{ shrink: true }}
+                        slotProps={{
+                            inputLabel: {
+                                shrink: true
+                            }
+                        }}
                         {...register('start', { required: 'Дата начала обязательна' })}
                         error={!!errors.start}
                         helperText={errors.start?.message as string}
@@ -135,7 +153,11 @@ export default function AssignmentForm({ assignment, onSubmit, onCancel }: Assig
                         fullWidth
                         type="date"
                         label="Дата окончания"
-                        InputLabelProps={{ shrink: true }}
+                        slotProps={{
+                            inputLabel: {
+                                shrink: true
+                            }
+                        }}
                         {...register('end', {
                             required: 'Дата окончания обязательна',
                             validate: (value, formValues) => {

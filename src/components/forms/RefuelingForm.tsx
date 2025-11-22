@@ -12,12 +12,12 @@ import {
     Select,
     MenuItem,
 } from '@mui/material';
-import { Refueling, Car } from '@/types';
+import { Refueling, Car, CreateRefuelingRequest } from '@/types';
 import { carService } from '@/services/carService';
 
 interface RefuelingFormProps {
     refueling?: Refueling | null;
-    onSubmit: (data: any) => void;
+    onSubmit: (data: CreateRefuelingRequest) => void;
     onCancel: () => void;
 }
 
@@ -27,18 +27,23 @@ export default function RefuelingForm({ refueling, onSubmit, onCancel }: Refueli
         handleSubmit,
         reset,
         formState: { errors, isSubmitting }
-    } = useForm();
+    } = useForm<CreateRefuelingRequest>();
 
     const [cars, setCars] = useState<Car[]>([]);
 
     useEffect(() => {
         loadCars();
+
         if (refueling) {
+            // При редактировании
             reset({
-                ...refueling,
-                date: refueling.date.split('T')[0],
+                carId: refueling.carId,
+                refilledLiters: refueling.refilledLiters,
+                price: refueling.price,
+                date: refueling.date.split('T')[0], // Безопасно обрабатываем дату
             });
         } else {
+            // При создании - текущая дата
             reset({
                 carId: '',
                 refilledLiters: 0,
@@ -47,6 +52,12 @@ export default function RefuelingForm({ refueling, onSubmit, onCancel }: Refueli
             });
         }
     }, [refueling, reset]);
+
+    // Функция для преобразования в формат бэкенда
+    const formatDateForBackend = (dateString: string): string => {
+        const date = new Date(dateString);
+        return date.toISOString();
+    };
 
     const loadCars = async () => {
         try {
@@ -57,11 +68,21 @@ export default function RefuelingForm({ refueling, onSubmit, onCancel }: Refueli
         }
     };
 
+    const handleFormSubmit = (data: CreateRefuelingRequest) => {
+        // Преобразуем даты в формат бэкенда перед отправкой
+        const formattedData = {
+            ...data,
+            date: formatDateForBackend(data.date),
+        };
+        console.log('Formatted refueling data for backend:', formattedData);
+        onSubmit(formattedData);
+    };
+
     return (
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 2 }}>
+        <Box component="form" onSubmit={handleSubmit(handleFormSubmit)} sx={{ mt: 2 }}>
             <Grid container spacing={3}>
                 <Grid size={{ xs: 12, sm: 6 }}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!!errors.carId}>
                         <InputLabel id="car-select-label">Автомобиль</InputLabel>
                         <Select
                             labelId="car-select-label"
@@ -89,7 +110,11 @@ export default function RefuelingForm({ refueling, onSubmit, onCancel }: Refueli
                         fullWidth
                         type="date"
                         label="Дата заправки"
-                        InputLabelProps={{ shrink: true }}
+                        slotProps={{
+                            inputLabel: {
+                                shrink: true
+                            }
+                        }}
                         {...register('date', { required: 'Дата обязательна' })}
                         error={!!errors.date}
                         helperText={errors.date?.message as string}
@@ -101,9 +126,15 @@ export default function RefuelingForm({ refueling, onSubmit, onCancel }: Refueli
                         fullWidth
                         type="number"
                         label="Количество литров"
+                        slotProps={{
+                            input: {
+                                inputProps: { min: 1, step: 1 }
+                            }
+                        }}
                         {...register('refilledLiters', {
                             required: 'Количество литров обязательно',
                             min: { value: 1, message: 'Количество должно быть больше 0' },
+                            valueAsNumber: true,
                         })}
                         error={!!errors.refilledLiters}
                         helperText={errors.refilledLiters?.message as string}
@@ -115,9 +146,15 @@ export default function RefuelingForm({ refueling, onSubmit, onCancel }: Refueli
                         fullWidth
                         type="number"
                         label="Стоимость (₽)"
+                        slotProps={{
+                            input: {
+                                inputProps: { min: 0, step: 0.01 }
+                            }
+                        }}
                         {...register('price', {
                             required: 'Стоимость обязательна',
                             min: { value: 0, message: 'Стоимость не может быть отрицательной' },
+                            valueAsNumber: true,
                         })}
                         error={!!errors.price}
                         helperText={errors.price?.message as string}

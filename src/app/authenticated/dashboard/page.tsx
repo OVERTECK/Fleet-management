@@ -61,19 +61,35 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        console.log("1")
         loadDashboardData();
     }, []);
 
     const loadDashboardData = async () => {
         try {
             setLoading(true);
+
+            // Загружаем данные параллельно с улучшенной обработкой ошибок
             const [cars, drivers, trips, maintenance, refuelings] = await Promise.all([
-                carService.getAll(),
-                driverService.getAll(),
-                tripService.getAll(),
-                maintenanceService.getAll(),
-                refuelingService.getAll()
+                carService.getAll().catch(error => {
+                    console.error('Error loading cars:', error);
+                    return [];
+                }),
+                driverService.getAll().catch(error => {
+                    console.error('Error loading drivers:', error);
+                    return [];
+                }),
+                tripService.getAll().catch(error => {
+                    console.error('Error loading trips:', error);
+                    return [];
+                }),
+                maintenanceService.getAll().catch(error => {
+                    console.error('Error loading maintenance:', error);
+                    return [];
+                }),
+                refuelingService.getAll().catch(error => {
+                    console.error('Error loading refuelings:', error);
+                    return [];
+                })
             ]);
 
             // Расчет статистики

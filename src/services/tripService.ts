@@ -1,5 +1,5 @@
 import { api } from './api';
-import { Trip } from '@/types';
+import { Trip, CreateTripRequest } from '@/types';
 
 export const tripService = {
     async getAll(): Promise<Trip[]> {
@@ -12,11 +12,25 @@ export const tripService = {
         return response.data;
     },
 
-    async create(trip: Omit<Trip, 'id'>): Promise<void> {
-        await api.post('/trips', trip);
+    async create(trip: CreateTripRequest): Promise<void> {
+        console.log('Sending trip data to backend:', trip);
+
+        const requestData = {
+            carId: trip.carId,
+            driverId: trip.driverId,
+            timeStart: trip.timeStart,
+            timeEnd: trip.timeEnd,
+            traveledKM: trip.traveledKM,
+            consumptionLitersFuel: trip.consumptionLitersFuel,
+        };
+
+        console.log('Formatted trip request data:', requestData);
+
+        await api.post('/trips', requestData);
     },
 
     async update(trip: Trip): Promise<void> {
+        console.log('Updating trip:', trip);
         await api.put('/trips', trip);
     },
 

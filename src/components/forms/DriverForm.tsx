@@ -15,11 +15,11 @@ import {
     OutlinedInput,
     SelectChangeEvent,
 } from '@mui/material';
-import { Driver } from '@/types';
+import { Driver, CreateDriverRequest } from '@/types';
 
 interface DriverFormProps {
     driver?: Driver | null;
-    onSubmit: (data: any) => void;
+    onSubmit: (data: CreateDriverRequest) => void;
     onCancel: () => void;
 }
 
@@ -36,24 +36,29 @@ export default function DriverForm({ driver, onSubmit, onCancel }: DriverFormPro
         setValue,
         watch,
         formState: { errors, isSubmitting }
-    } = useForm();
+    } = useForm<CreateDriverRequest>();
 
     const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
-    // Следим за изменением категорий в форме
-    const watchCategories = watch('categoryDrive', '');
-
     useEffect(() => {
         if (driver) {
-            reset(driver);
+            // При редактировании - заполняем форму данными водителя
+            reset({
+                name: driver.name,
+                lastName: driver.lastName,
+                pathronymic: driver.pathronymic || '', // Изменено поле
+                contactData: driver.contactData,
+                categoryDrive: driver.categoryDrive,
+            });
             // Парсим категории из строки в массив
             const categories = driver.categoryDrive.split(',').map(cat => cat.trim()).filter(Boolean);
             setSelectedCategories(categories);
         } else {
+            // При создании - пустая форма
             reset({
                 name: '',
                 lastName: '',
-                patronymic: '',
+                pathronymic: '',
                 contactData: '',
                 categoryDrive: '',
             });
@@ -84,7 +89,10 @@ export default function DriverForm({ driver, onSubmit, onCancel }: DriverFormPro
                         fullWidth
                         label="Фамилия"
                         variant="outlined"
-                        {...register('lastName', { required: 'Фамилия обязательна' })}
+                        {...register('lastName', {
+                            required: 'Фамилия обязательна',
+                            minLength: { value: 1, message: 'Фамилия не может быть пустой' }
+                        })}
                         error={!!errors.lastName}
                         helperText={errors.lastName?.message as string}
                     />
@@ -95,7 +103,10 @@ export default function DriverForm({ driver, onSubmit, onCancel }: DriverFormPro
                         fullWidth
                         label="Имя"
                         variant="outlined"
-                        {...register('name', { required: 'Имя обязательно' })}
+                        {...register('name', {
+                            required: 'Имя обязательно',
+                            minLength: { value: 1, message: 'Имя не может быть пустым' }
+                        })}
                         error={!!errors.name}
                         helperText={errors.name?.message as string}
                     />
@@ -106,9 +117,9 @@ export default function DriverForm({ driver, onSubmit, onCancel }: DriverFormPro
                         fullWidth
                         label="Отчество"
                         variant="outlined"
-                        {...register('patronymic')}
-                        error={!!errors.patronymic}
-                        helperText={errors.patronymic?.message as string}
+                        {...register('pathronymic')} // Изменено поле
+                        error={!!errors.pathronymic}
+                        helperText={errors.pathronymic?.message as string}
                     />
                 </Grid>
 
@@ -118,14 +129,17 @@ export default function DriverForm({ driver, onSubmit, onCancel }: DriverFormPro
                         label="Контактные данные"
                         variant="outlined"
                         placeholder="Телефон или email"
-                        {...register('contactData', { required: 'Контактные данные обязательны' })}
+                        {...register('contactData', {
+                            required: 'Контактные данные обязательны',
+                            minLength: { value: 3, message: 'Контактные данные слишком короткие' }
+                        })}
                         error={!!errors.contactData}
                         helperText={errors.contactData?.message as string}
                     />
                 </Grid>
 
                 <Grid size={{ xs: 12 }}>
-                    <FormControl fullWidth>
+                    <FormControl fullWidth error={!!errors.categoryDrive}>
                         <InputLabel id="category-drive-label">Категории прав</InputLabel>
                         <Select
                             labelId="category-drive-label"
@@ -154,7 +168,13 @@ export default function DriverForm({ driver, onSubmit, onCancel }: DriverFormPro
                             ))}
                         </Select>
                     </FormControl>
-                    <input type="hidden" {...register('categoryDrive', { required: 'Выберите хотя бы одну категорию' })} />
+                    <input
+                        type="hidden"
+                        {...register('categoryDrive', {
+                            required: 'Выберите хотя бы одну категорию',
+                            validate: (value) => value && value.trim().length > 0 || 'Выберите хотя бы одну категорию'
+                        })}
+                    />
                     {errors.categoryDrive && (
                         <Box sx={{ color: 'error.main', fontSize: '0.75rem', mt: 0.5, ml: 1.5 }}>
                             {errors.categoryDrive.message as string}
