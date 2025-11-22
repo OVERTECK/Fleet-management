@@ -25,3 +25,6 @@ Desktop.ini
 redis_data/
 pgdata/
 *.csv
+node_modules/
+next-env.d.ts
+.next/

@@ -25,6 +25,10 @@ public class MyDbContext(DbContextOptions<MyDbContext> options) : DbContext(opti
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<RoleEntity>().HasData(
+            new RoleEntity { Id = 1, Title = "Водитель" },
+            new RoleEntity { Id = 2, Title = "Диспетчер" },
+            new RoleEntity { Id = 3, Title = "Администратор" }
+        );
     }
 }
