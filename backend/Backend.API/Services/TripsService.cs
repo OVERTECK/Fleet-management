@@ -33,6 +33,11 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRep
 
         var oldCar = await carsRepository.GetByVIN(request.CarId);
 
+        if (oldCar == null)
+        {
+            throw new NullReferenceException($"Unable to find car with id {request.CarId}");
+        }
+
         var updatedCar = new CarEntity
         {
             VIN = oldCar.VIN,
@@ -70,6 +75,12 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRep
         }
 
         var oldCar = await carsRepository.GetByVIN(request.CarId);
+
+        if (oldCar == null)
+        {
+            throw new NullReferenceException($"Unable to find car with id {request.CarId}");
+        }
+
         var oldTrip = await tripsRepository.GetById(request.Id);
 
         var updatedCar = new CarEntity
@@ -103,7 +114,17 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRep
 
         var oldTrip = await tripsRepository.GetById(id);
 
+        if (oldTrip == null)
+        {
+            throw new NullReferenceException($"Unable to find trip with id {id}");
+        }
+
         var oldCar = await carsRepository.GetByVIN(oldTrip.CarId);
+
+        if (oldCar == null)
+        {
+            throw new NullReferenceException($"Unable to find car with id {oldTrip.CarId}");
+        }
 
         var updatedCar = new CarEntity
         {

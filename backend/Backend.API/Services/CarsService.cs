@@ -19,7 +19,14 @@ public class CarsService(
     {
         logger.LogInformation("Get car by id");
 
-        return await carRepository.GetByVIN(vin);
+        var searchedCar = await carRepository.GetByVIN(vin);
+
+        if (searchedCar == null)
+        {
+            throw new NullReferenceException("Car not found");
+        }
+
+        return searchedCar;
     }
 
     public async Task Create(CreateCarRequest request)

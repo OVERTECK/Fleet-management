@@ -12,5 +12,5 @@ public class UserEntity
 
     public required int RoleId { get; set; }
 
-    public required RoleEntity Role { get; set; }
+    public RoleEntity Role { get; set; }
 }

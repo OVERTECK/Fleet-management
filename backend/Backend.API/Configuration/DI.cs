@@ -1,19 +1,23 @@
+using System.Text;
 using Backend.API.EndpointsSettings;
 using Backend.API.Features.Analytics;
 using Backend.API.Features.Cars;
 using Backend.API.Features.Drivers;
 using Backend.API.Features.GasStation;
+using Backend.API.Features.Login;
 using Backend.API.Features.MaintenanceRecords;
+using Backend.API.Features.Registration;
 using Backend.API.Features.Routes;
 using Backend.API.Features.Targets;
 using Backend.API.Features.Trips;
 using Backend.API.Services;
 using Backend.DataAccess;
 using Backend.DataAccess.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using Serilog.Exceptions;
-using Update = Backend.API.Features.GasStation.Update;
 
 namespace Backend.API.Configuration;
 
@@ -22,9 +26,11 @@ public static class DI
     public static IServiceCollection AddConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         return services
+            .AddAuthorization()
             .AddSerilogLogging(configuration)
             .AddOpenApiSpec()
             .AddCors()
+            .AddJwtAuthentication(configuration)
             .AddMyHandlers()
             .AddServices()
             .AddRepositories()
@@ -112,6 +118,9 @@ public static class DI
 
         services.AddScoped<CostRankingHandler>();
 
+        services.AddScoped<LoginHandler>();
+        services.AddScoped<RegistrationHandler>();
+
         return services;
     }
 
@@ -125,6 +134,9 @@ public static class DI
         services.AddScoped<TargetsService>();
         services.AddScoped<TripsService>();
         services.AddScoped<AnalyticsService>();
+        services.AddScoped<UsersService>();
+        services.AddScoped<JwtService>();
+        services.AddScoped<HashService>();
 
         return services;
     }
@@ -139,6 +151,7 @@ public static class DI
         services.AddScoped<TargetsRepository>();
         services.AddScoped<TripsRepository>();
         services.AddScoped<AnalyticsRepository>();
+        services.AddScoped<UsersRepository>();
 
         return services;
     }
@@ -165,6 +178,45 @@ public static class DI
         {
             options.Configuration = configuration.GetConnectionString("Redis");
         });
+
+        return services;
+    }
+
+    private static IServiceCollection AddJwtAuthentication(
+        this IServiceCollection services,
+        IConfiguration configuration)
+    {
+        var jwtSettings = configuration.GetSection("JWT");
+        var secretKey = Encoding.UTF8.GetBytes(jwtSettings["SecretKey"]!);
+
+        services.AddAuthentication(options =>
+        {
+            options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                ValidateIssuerSigningKey = true,
+                ValidateLifetime = true,
+                ValidIssuer = jwtSettings["Issuer"]!,
+                ValidAudience = jwtSettings["Audience"]!,
+                IssuerSigningKey = new SymmetricSecurityKey(secretKey),
+            };
+
+            options.Events = new JwtBearerEvents
+            {
+                OnMessageReceived = context =>
+                {
+                    context.Token = context.Request.Cookies["token"];
+
+                    return Task.CompletedTask;
+                },
+            };
+        });
+
+        services.Configure<JwtOptions>(configuration.GetSection("JWT"));
 
         return services;
     }
