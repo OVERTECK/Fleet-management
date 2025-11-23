@@ -2,6 +2,7 @@ using Backend.API.EndpointsSettings;
 using Backend.API.Services;
 using Backend.DataAccess.DTO.Requests.Driver;
 using Backend.DataAccess.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.API.Features.Drivers;
 
@@ -29,6 +30,12 @@ public sealed class DriverCreateHandler(
             await driversService.Create(driverRequest);
 
             return Results.Created();
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex.Message);
+
+            return Results.BadRequest("Error. Attempt to write a non-existent foreign key.");
         }
         catch (Exception ex)
         {

@@ -2,6 +2,7 @@ using Backend.API.EndpointsSettings;
 using Backend.API.Services;
 using Backend.DataAccess.DTO.Requests;
 using Backend.DataAccess.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.API.Features.GasStation;
 
@@ -46,6 +47,12 @@ sealed class GasStationCreateHandler(
             logger.LogError(ex, ex.Message);
 
             return Results.NotFound();
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex.Message);
+
+            return Results.BadRequest("Error. Attempt to write a non-existent foreign key.");
         }
         catch (Exception ex)
         {

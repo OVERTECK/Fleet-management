@@ -1,6 +1,7 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
 using Backend.DataAccess.DTO.Requests;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.API.Features.Registration;
 
@@ -43,6 +44,12 @@ sealed class RegistrationHandler(
             logger.LogError(ex.Message);
 
             return Results.Unauthorized();
+        }
+        catch (DbUpdateException ex)
+        {
+            logger.LogError(ex.Message);
+
+            return Results.BadRequest("Error. Attempt to write a non-existent foreign key.");
         }
         catch (Exception ex)
         {
