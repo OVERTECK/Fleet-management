@@ -31,6 +31,16 @@ public class TripsRepository(
         return trips;
     }
 
+    public async Task<List<TripEntity>> GetByUserId(Guid userId)
+    {
+        var trips = await dbContext.Trips
+            .AsNoTracking()
+            .Where(c => c.CreatedUserId == userId)
+            .ToListAsync();
+
+        return trips;
+    }
+
     public async Task<TripEntity?> GetById(Guid id)
     {
         await this.EnsureExists(id);

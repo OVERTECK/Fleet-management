@@ -45,6 +45,12 @@ sealed class RegistrationHandler(
 
             return Results.Unauthorized();
         }
+        catch (ArgumentException ex)
+        {
+            logger.LogError(ex.Message);
+
+            return Results.BadRequest(ex.Message);
+        }
         catch (DbUpdateException ex)
         {
             logger.LogError(ex.Message);

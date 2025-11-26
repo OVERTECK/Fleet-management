@@ -13,4 +13,6 @@ public class CreateTripRequest
     public required int TraveledKM  { get; set; }
 
     public required int ConsumptionLitersFuel { get; set; }
+
+    public required Guid CreatedUserId { get; set; }
 }

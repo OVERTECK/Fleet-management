@@ -25,12 +25,24 @@ public class UsersService(
             throw new UnauthorizedAccessException("Passwords do not match");
         }
 
-        return jwtService.GetToken(searchedUser.Id);
+        return jwtService.GetToken(searchedUser);
     }
 
     public async Task<UserEntity> GetByLogin(string login)
     {
         var searchedUser = await usersRepository.GetByLogin(login);
+
+        if (searchedUser == null)
+        {
+            throw new NullReferenceException("User not found");
+        }
+
+        return searchedUser;
+    }
+
+    public async Task<UserEntity> GetById(Guid id)
+    {
+        var searchedUser = await usersRepository.GetById(id);
 
         if (searchedUser == null)
         {
@@ -46,7 +58,7 @@ public class UsersService(
 
         if (searchedUser != null)
         {
-            throw new Exception("User is already registered");
+            throw new ArgumentException("User is already registered");
         }
 
         var hashedPassword = hashService.CreateHash(signUpRequest.Password);
@@ -61,6 +73,13 @@ public class UsersService(
 
         await usersRepository.Create(user);
 
-        return jwtService.GetToken(user.Id);
+        var createdUser = await usersRepository.GetByLogin(signUpRequest.Login);
+
+        if (createdUser == null)
+        {
+            throw new NullReferenceException("User not found");
+        }
+
+        return jwtService.GetToken(createdUser);
     }
 }

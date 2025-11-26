@@ -226,6 +226,9 @@ namespace Backend.DataAccess.Migrations
                     b.Property<int>("ConsumptionLitersFuel")
                         .HasColumnType("integer");
 
+                    b.Property<Guid>("CreatedUserId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("DriverId")
                         .HasColumnType("uuid");
 

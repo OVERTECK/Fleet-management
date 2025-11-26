@@ -26,7 +26,6 @@ public static class DI
     public static IServiceCollection AddConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
         return services
-            .AddAuthorization()
             .AddSerilogLogging(configuration)
             .AddOpenApiSpec()
             .AddCors()
@@ -217,6 +216,16 @@ public static class DI
         });
 
         services.Configure<JwtOptions>(configuration.GetSection("JWT"));
+
+        services.AddAuthorization(options =>
+        {
+            options.AddPolicy("Admin", policy => policy.RequireRole("Администратор"));
+            options.AddPolicy("Dispatcher", policy => policy.RequireRole("Диспетчер"));
+            options.AddPolicy("Driver", policy => policy.RequireRole("Водитель"));
+            options.AddPolicy("Staff", policy => policy.RequireRole("Администратор", "Диспетчер", "Водитель"));
+        });
+
+        services.AddHttpContextAccessor();
 
         return services;
     }

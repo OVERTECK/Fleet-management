@@ -14,7 +14,9 @@ public class UsersRepository(MyDbContext dbContext)
 
     public async Task<UserEntity?> GetByLogin(string login)
     {
-        var searchedUser = await dbContext.Users.FirstOrDefaultAsync(c => c.Login == login);
+        var searchedUser = await dbContext.Users
+            .Include(u => u.Role)
+            .FirstOrDefaultAsync(c => c.Login == login);
 
         return searchedUser;
     }

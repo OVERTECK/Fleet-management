@@ -15,4 +15,6 @@ public class UpdateTripRequest
     public required int TraveledKM  { get; init; }
 
     public required int ConsumptionLitersFuel { get; init; }
+
+    public required Guid CreatedUserId { get; set; }
 }

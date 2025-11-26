@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Backend.DataAccess.DTO.Requests;
 using Backend.DataAccess.Entities;
 using Backend.DataAccess.Repositories;
@@ -6,11 +7,38 @@ namespace Backend.API.Services;
 
 public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRepository, CarsRepository carsRepository)
 {
-    public async Task<List<TripEntity>> GetAll()
+    public async Task<List<TripEntity>> GetAll(IHttpContextAccessor contextAccessor)
     {
         logger.LogInformation($"{nameof(TripEntity)}: Get all trip");
 
-        return await tripsRepository.GetAll();
+        var user = contextAccessor.HttpContext?.User;
+
+        if (user?.Identity?.IsAuthenticated != true)
+        {
+            throw new UnauthorizedAccessException();
+        }
+
+        var userId = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userRole = user.FindFirst(ClaimTypes.Role)?.Value;
+
+        switch (userRole)
+        {
+            case "Администратор":
+            case "Диспетчер":
+            {
+                return await tripsRepository.GetAll();
+            }
+
+            case "Водитель":
+            {
+                return await tripsRepository.GetByUserId(Guid.Parse(userId));
+            }
+
+            default:
+            {
+                return [];
+            }
+        }
     }
 
     public async Task<TripEntity?> GetById(Guid id)
@@ -58,6 +86,7 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRep
             TimeStart = request.TimeStart,
             TraveledKM = request.TraveledKM,
             ConsumptionLitersFuel = request.ConsumptionLitersFuel,
+            CreatedUserId = request.CreatedUserId,
         };
 
         await tripsRepository.Create(trip);
@@ -103,6 +132,7 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRep
             TimeEnd = request.TimeEnd,
             TimeStart = request.TimeStart,
             TraveledKM = request.TraveledKM,
+            CreatedUserId = request.CreatedUserId,
         };
 
         await tripsRepository.Update(trip);
