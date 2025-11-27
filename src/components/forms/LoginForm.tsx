@@ -30,14 +30,15 @@ export default function LoginForm({ onSuccess, onError }: LoginFormProps) {
 
     const onSubmit = async (data: LoginFormData) => {
         try {
-            await usersService.login(data);
+            const user = await usersService.login(data);
             onSuccess('Вход выполнен успешно!');
-            // Перенаправляем на дашборд
+
+            // Обновляем состояние аутентификации и редирект на поездки
             setTimeout(() => {
-                router.push('/dashboard');
+                window.location.href = '/trips';
             }, 1000);
         } catch (error: any) {
-            const errorMessage = error.response?.data || 'Ошибка входа';
+            const errorMessage = error.response?.data?.title || error.response?.data || 'Ошибка входа';
             onError(typeof errorMessage === 'string' ? errorMessage : 'Неизвестная ошибка');
         }
     };
