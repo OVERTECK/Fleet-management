@@ -7,7 +7,9 @@ public class UsersRepository(MyDbContext dbContext)
 {
     public async Task<UserEntity?> GetById(Guid id)
     {
-        var searchedUser = await dbContext.Users.FirstOrDefaultAsync(c => c.Id == id);
+        var searchedUser = await dbContext.Users
+            .Include(c => c.Role)
+            .FirstOrDefaultAsync(c => c.Id == id);
 
         return searchedUser;
     }

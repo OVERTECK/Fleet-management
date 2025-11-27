@@ -119,6 +119,7 @@ public static class DI
 
         services.AddScoped<LoginHandler>();
         services.AddScoped<RegistrationHandler>();
+        services.AddScoped<GetMeHandler>();
 
         return services;
     }
