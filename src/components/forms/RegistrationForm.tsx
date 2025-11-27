@@ -39,16 +39,15 @@ export default function RegistrationForm({ onSuccess, onError }: RegistrationFor
 
     const onSubmit = async (data: RegistrationFormData) => {
         try {
-            const user = await usersService.register({
+            await usersService.register({
                 login: data.login,
                 password: data.password,
                 roleId: data.roleId
             });
             onSuccess('Регистрация выполнена успешно!');
-
-            // Редирект на поездки после регистрации
+            // Перенаправляем на дашборд
             setTimeout(() => {
-                window.location.href = '/trips';
+                router.push('/dashboard');
             }, 1000);
         } catch (error: any) {
             const errorMessage = error.response?.data || 'Ошибка регистрации';
