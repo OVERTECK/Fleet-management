@@ -33,11 +33,9 @@ sealed class RegistrationHandler(
 
             var token = await usersService.SignUp(signUpRequest);
 
-            var user = await usersService.GetByLogin(signUpRequest.Login);
-
             response.Cookies.Append("token", token);
 
-            return Results.Ok(user);
+            return Results.Ok();
         }
         catch (UnauthorizedAccessException ex)
         {

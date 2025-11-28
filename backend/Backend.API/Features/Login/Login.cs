@@ -32,11 +32,9 @@ sealed class LoginHandler(
 
             var token = await usersService.Login(signInRequest);
 
-            var user = await usersService.GetByLogin(signInRequest.Login);
-
             response.Cookies.Append("token", token);
 
-            return Results.Ok(user);
+            return Results.Ok();
         }
         catch (UnauthorizedAccessException ex)
         {
