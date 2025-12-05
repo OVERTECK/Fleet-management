@@ -1,17 +1,9 @@
 'use client';
 
 import { useForm } from 'react-hook-form';
-import {
-    TextField,
-    Button,
-    Box,
-    Typography,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-} from '@mui/material';
+import { TextField, Button, Box, Typography, MenuItem } from '@mui/material';
 import { usersService } from '@/services/usersService';
+import { useAuth } from '@/components/AuthProvider';
 import { useRouter } from 'next/navigation';
 
 interface RegistrationFormProps {
@@ -19,45 +11,41 @@ interface RegistrationFormProps {
     onError: (message: string) => void;
 }
 
-interface RegistrationFormData {
-    login: string;
-    password: string;
-    confirmPassword: string;
-    roleId: number;
-}
-
 export default function RegistrationForm({ onSuccess, onError }: RegistrationFormProps) {
-    const {
-        register,
-        handleSubmit,
-        watch,
-        formState: { errors, isSubmitting }
-    } = useForm<RegistrationFormData>();
+    const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm();
+    const { login } = useAuth();
     const router = useRouter();
-
     const password = watch('password');
 
-    const onSubmit = async (data: RegistrationFormData) => {
+    const onSubmit = async (data: any) => {
         try {
-            await usersService.register({
+            console.log('Registration attempt:', data);
+
+            const user = await usersService.register({
                 login: data.login,
                 password: data.password,
-                roleId: data.roleId
+                roleId: Number(data.roleId),
             });
+
+            console.log('Registration successful, user:', user);
+
+            // Обновляем контекст
+            login(user);
+
             onSuccess('Регистрация выполнена успешно!');
-            // Перенаправляем на дашборд
-            setTimeout(() => {
-                router.push('/dashboard');
-            }, 1000);
+
+            // Немедленный редирект
+            router.push('/dashboard');
+
         } catch (error: any) {
-            const errorMessage = error.response?.data || 'Ошибка регистрации';
-            onError(typeof errorMessage === 'string' ? errorMessage : 'Неизвестная ошибка');
+            console.error('Registration error:', error);
+            onError(error.response?.data?.message || 'Ошибка регистрации');
         }
     };
 
     return (
         <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
-            <Typography component="h1" variant="h5" align="center" gutterBottom>
+            <Typography variant="h5" align="center" gutterBottom>
                 Регистрация
             </Typography>
 
@@ -66,14 +54,12 @@ export default function RegistrationForm({ onSuccess, onError }: RegistrationFor
                 required
                 fullWidth
                 label="Логин"
-                autoComplete="username"
-                autoFocus
                 {...register('login', {
                     required: 'Логин обязателен',
-                    minLength: { value: 3, message: 'Логин должен содержать минимум 3 символа' }
+                    minLength: { value: 3, message: 'Минимум 3 символа' }
                 })}
                 error={!!errors.login}
-                helperText={errors.login?.message}
+                helperText={errors.login?.message as string}
             />
 
             <TextField
@@ -82,13 +68,12 @@ export default function RegistrationForm({ onSuccess, onError }: RegistrationFor
                 fullWidth
                 label="Пароль"
                 type="password"
-                autoComplete="new-password"
                 {...register('password', {
                     required: 'Пароль обязателен',
-                    minLength: { value: 6, message: 'Пароль должен содержать минимум 6 символов' }
+                    minLength: { value: 6, message: 'Минимум 6 символов' }
                 })}
                 error={!!errors.password}
-                helperText={errors.password?.message}
+                helperText={errors.password?.message as string}
             />
 
             <TextField
@@ -97,35 +82,35 @@ export default function RegistrationForm({ onSuccess, onError }: RegistrationFor
                 fullWidth
                 label="Подтверждение пароля"
                 type="password"
-                autoComplete="new-password"
                 {...register('confirmPassword', {
                     required: 'Подтвердите пароль',
                     validate: value => value === password || 'Пароли не совпадают'
                 })}
                 error={!!errors.confirmPassword}
-                helperText={errors.confirmPassword?.message}
+                helperText={errors.confirmPassword?.message as string}
             />
 
-            <FormControl fullWidth margin="normal">
-                <InputLabel id="role-label">Роль</InputLabel>
-                <Select
-                    labelId="role-label"
-                    label="Роль"
-                    defaultValue={2}
-                    {...register('roleId', { required: 'Выберите роль', valueAsNumber: true })}
-                    error={!!errors.roleId}
-                >
-                    <MenuItem value={1}>Администратор</MenuItem>
-                    <MenuItem value={2}>Диспетчер</MenuItem>
-                    <MenuItem value={3}>Водитель</MenuItem>
-                </Select>
-            </FormControl>
+            <TextField
+                margin="normal"
+                required
+                fullWidth
+                select
+                label="Роль"
+                defaultValue={2}
+                {...register('roleId', { required: 'Выберите роль' })}
+                error={!!errors.roleId}
+                helperText={errors.roleId?.message as string}
+            >
+                <MenuItem value={1}>Водитель</MenuItem>
+                <MenuItem value={2}>Диспетчер</MenuItem>
+                <MenuItem value={3}>Администратор</MenuItem>
+            </TextField>
 
             <Button
                 type="submit"
                 fullWidth
                 variant="contained"
-                sx={{ mt: 3, mb: 2 }}
+                sx={{ mt: 3 }}
                 disabled={isSubmitting}
             >
                 {isSubmitting ? 'Регистрация...' : 'Зарегистрироваться'}

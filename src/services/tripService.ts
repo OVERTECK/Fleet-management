@@ -3,8 +3,17 @@ import { Trip, CreateTripRequest } from '@/types';
 
 export const tripService = {
     async getAll(): Promise<Trip[]> {
-        const response = await api.get('/trips');
-        return response.data;
+        try {
+            const response = await api.get('/trips');
+            return response.data;
+        } catch (error: any) {
+            console.error('Error fetching trips:', error);
+            if (error.response?.status === 500) {
+                console.warn('Backend returned 500, returning empty array');
+                return [];
+            }
+            throw error;
+        }
     },
 
     async getById(id: string): Promise<Trip> {
@@ -22,10 +31,11 @@ export const tripService = {
             timeEnd: trip.timeEnd,
             traveledKM: trip.traveledKM,
             consumptionLitersFuel: trip.consumptionLitersFuel,
+            createdUserId: trip.createdUserId,
+            route: trip.route || [],
         };
 
         console.log('Formatted trip request data:', requestData);
-
         await api.post('/trips', requestData);
     },
 

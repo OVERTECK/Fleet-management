@@ -3,38 +3,99 @@ import { api } from './api';
 export interface User {
     id: string;
     login: string;
-    roleId: number;
-}
-
-export interface LoginRequest {
-    login: string;
-    password: string;
-}
-
-export interface RegisterRequest {
-    login: string;
-    password: string;
+    role: string | { id: number; title: string };
     roleId: number;
 }
 
 export const usersService = {
-    async login(credentials: LoginRequest): Promise<User> {
-        const response = await api.post('/login', credentials);
-        return response.data;
+    async login(credentials: { login: string; password: string }): Promise<User> {
+        try {
+            const response = await api.post('/login', credentials, {
+                withCredentials: true, // Убедитесь, что куки отправляются
+            });
+
+            console.log('Login response headers:', response.headers);
+            console.log('Login response data:', response.data);
+
+            // Сохраняем минимальную информацию
+            if (response.data) {
+                const userData = {
+                    id: response.data.id || '',
+                    login: response.data.login || '',
+                    role: response.data.role || '',
+                    roleId: response.data.roleId || 0,
+                };
+                localStorage.setItem('currentUser', JSON.stringify(userData));
+            }
+
+            return response.data;
+        } catch (error) {
+            console.error('Login service error:', error);
+            throw error;
+        }
     },
 
-    async register(userData: RegisterRequest): Promise<User> {
-        const response = await api.post('/registration', userData);
-        return response.data;
+    async register(userData: { login: string; password: string; roleId: number }): Promise<User> {
+        try {
+            const response = await api.post('/registration', userData, {
+                withCredentials: true,
+            });
+
+            console.log('Register response headers:', response.headers);
+
+            if (response.data) {
+                const userInfo = {
+                    id: response.data.id || '',
+                    login: response.data.login || '',
+                    role: response.data.role || '',
+                    roleId: response.data.roleId || 0,
+                };
+                localStorage.setItem('currentUser', JSON.stringify(userInfo));
+            }
+
+            return response.data;
+        } catch (error) {
+            console.error('Register service error:', error);
+            throw error;
+        }
     },
 
     async getCurrentUser(): Promise<User> {
-        const response = await api.get('/users/me');
-        return response.data;
+        try {
+            // Проверяем localStorage
+            const cached = localStorage.getItem('currentUser');
+            if (cached) {
+                try {
+                    return JSON.parse(cached);
+                } catch (e) {
+                    console.warn('Invalid cached user data');
+                }
+            }
+
+            // Запрашиваем с сервера
+            const response = await api.get('/users/me', {
+                withCredentials: true,
+            });
+
+            if (response.data) {
+                const userData = {
+                    id: response.data.id || '',
+                    login: response.data.login || '',
+                    role: response.data.role || '',
+                    roleId: response.data.roleId || 0,
+                };
+                localStorage.setItem('currentUser', JSON.stringify(userData));
+                return userData;
+            }
+
+            throw new Error('No user data received');
+        } catch (error) {
+            console.error('Get current user error:', error);
+            throw error;
+        }
     },
 
-    async logout(): Promise<void> {
-        // На бэкенде обычно инвалидируется токен
-        document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
-    },
+    logout() {
+        localStorage.removeItem('currentUser');
+    }
 };

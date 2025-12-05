@@ -22,6 +22,7 @@ import {
     Dashboard,
     ExitToApp,
     Analytics,
+    Assessment, // Добавили иконку отчетов
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -50,7 +51,7 @@ const managementMenuItems = [
     { text: 'Назначения', icon: <Assignment />, path: '/assignments', roles: [2, 3] },
     { text: 'Техобслуживание', icon: <Build />, path: '/maintenance', roles: [2, 3] },
     { text: 'Заправки', icon: <LocalGasStation />, path: '/refueling', roles: [2, 3] },
-    { text: 'Отчеты', icon: <Analytics />, path: '/reports', roles: [2, 3] },
+    { text: 'Отчеты', icon: <Assessment />, path: '/reports', roles: [2, 3] }, // Добавили отчеты
 ];
 
 // Пункты меню только для администраторов

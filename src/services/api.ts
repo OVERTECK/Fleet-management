@@ -7,35 +7,21 @@ export const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
+    withCredentials: true, // КРИТИЧЕСКИ ВАЖНО для отправки кук
 });
 
-// Интерцептор для логирования запросов
+// Убираем лишние интерцепторы - они могут мешать
 api.interceptors.request.use(
     (config) => {
-        console.log(`Making ${config.method?.toUpperCase()} request to: ${config.url}`);
-        console.log('Request data:', config.data);
+        // Только минимальное логирование
         return config;
     },
     (error) => {
-        console.error('Request error:', error);
         return Promise.reject(error);
     }
 );
 
-// Интерцептор для обработки ответов
 api.interceptors.response.use(
-    (response) => {
-        console.log(`Response from ${response.config.url}:`, response.status, response.data);
-        return response;
-    },
-    (error) => {
-        console.error('API Error:', {
-            url: error.config?.url,
-            method: error.config?.method,
-            status: error.response?.status,
-            data: error.response?.data,
-            message: error.message
-        });
-        return Promise.reject(error);
-    }
+    (response) => response,
+    (error) => Promise.reject(error)
 );

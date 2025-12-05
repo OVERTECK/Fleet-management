@@ -1,4 +1,12 @@
+export interface RoutePoint {
+    [x: string]: any;
+    latitude: number;
+    longitude: number;
+    address?: string;
+    timestamp?: string;
+}
 export interface Car {
+    totalFuel: number;
     vin: string;
     model: string;
     number: string;
@@ -23,7 +31,10 @@ export interface Trip {
     timeEnd: string;
     traveledKM: number;
     consumptionLitersFuel: number;
+    createdUserId?: string;
+    route?: RoutePoint[];
 }
+
 
 export interface Assignment {
     id: string;
@@ -56,7 +67,6 @@ export interface Route {
     countKM: number;
 }
 
-// Типы для запросов создания
 export interface CreateDriverRequest {
     name: string;
     lastName: string;
@@ -101,4 +111,7 @@ export interface CreateTripRequest {
     timeEnd: string;
     traveledKM: number;
     consumptionLitersFuel: number;
+    createdUserId?: string;
+    route?: RoutePoint[];
 }
+

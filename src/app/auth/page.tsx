@@ -1,95 +1,39 @@
 'use client';
 
-import { useState, Suspense } from 'react';
-import {
-    Box,
-    Paper,
-    Tab,
-    Tabs,
-    Typography,
-    Container,
-    Alert,
-    CircularProgress,
-} from '@mui/material';
+import { useState } from 'react';
+import { Box, Paper, Tab, Tabs, Typography, Container, Alert } from '@mui/material';
 import LoginForm from '@/components/forms/LoginForm';
 import RegistrationForm from '@/components/forms/RegistrationForm';
-import { useAuth } from '@/components/AuthProvider';
 import ClientOnly from '@/components/ClientOnly';
 
-interface TabPanelProps {
-    children?: React.ReactNode;
-    index: number;
-    value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
-
+function TabPanel({ children, value, index }: any) {
     return (
-        <div
-            role="tabpanel"
-            hidden={value !== index}
-            id={`auth-tabpanel-${index}`}
-            aria-labelledby={`auth-tab-${index}`}
-            {...other}
-        >
-            {value === index && (
-                <Box sx={{ p: 3 }}>
-                    <Suspense fallback={<CircularProgress />}>
-                        {children}
-                    </Suspense>
-                </Box>
-            )}
+        <div hidden={value !== index}>
+            {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
         </div>
     );
 }
 
 export default function AuthPage() {
     const [tabValue, setTabValue] = useState(0);
-    const [error, setError] = useState<string | null>(null);
-    const [success, setSuccess] = useState<string | null>(null);
-    const { setIsAuthenticated } = useAuth();
+    const [error, setError] = useState<string>('');
+    const [success, setSuccess] = useState<string>('');
 
-    const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    const handleTabChange = (e: any, newValue: number) => {
         setTabValue(newValue);
-        setError(null);
-        setSuccess(null);
-    };
-
-    const handleAuthSuccess = (message: string) => {
-        setSuccess(message);
-        setError(null);
-        setIsAuthenticated(true);
-    };
-
-    const handleAuthError = (message: string) => {
-        setError(message);
-        setSuccess(null);
+        setError('');
+        setSuccess('');
     };
 
     return (
         <ClientOnly>
-            <Container component="main" maxWidth="sm">
-                <Box
-                    sx={{
-                        marginTop: 8,
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        minHeight: '100vh',
-                        py: 4,
-                    }}
-                >
+            <Container maxWidth="sm">
+                <Box sx={{ mt: 8, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
                     <Paper elevation={3} sx={{ width: '100%', maxWidth: 400 }}>
                         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                            <Tabs
-                                value={tabValue}
-                                onChange={handleTabChange}
-                                centered
-                                aria-label="Authentication tabs"
-                            >
-                                <Tab label="Вход" id="auth-tab-0" aria-controls="auth-tabpanel-0" />
-                                <Tab label="Регистрация" id="auth-tab-1" aria-controls="auth-tabpanel-1" />
+                            <Tabs value={tabValue} onChange={handleTabChange} centered>
+                                <Tab label="Вход" />
+                                <Tab label="Регистрация" />
                             </Tabs>
                         </Box>
 
@@ -107,15 +51,27 @@ export default function AuthPage() {
 
                         <TabPanel value={tabValue} index={0}>
                             <LoginForm
-                                onSuccess={handleAuthSuccess}
-                                onError={handleAuthError}
+                                onSuccess={(msg) => {
+                                    setSuccess(msg);
+                                    setError('');
+                                }}
+                                onError={(msg) => {
+                                    setError(msg);
+                                    setSuccess('');
+                                }}
                             />
                         </TabPanel>
 
                         <TabPanel value={tabValue} index={1}>
                             <RegistrationForm
-                                onSuccess={handleAuthSuccess}
-                                onError={handleAuthError}
+                                onSuccess={(msg) => {
+                                    setSuccess(msg);
+                                    setError('');
+                                }}
+                                onError={(msg) => {
+                                    setError(msg);
+                                    setSuccess('');
+                                }}
                             />
                         </TabPanel>
                     </Paper>
