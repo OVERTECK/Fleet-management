@@ -20,7 +20,11 @@ public class TripsRepository(
             return JsonSerializer.Deserialize<List<TripEntity>>(cachedData) ?? new List<TripEntity>();
         }
 
-        var trips = await dbContext.Trips.Include(c => c.Routes).ToListAsync();
+        var trips = await dbContext.Trips
+            .Include(c => c.Routes)
+            .Include(c => c.Car)
+            .Include(c => c.Driver)
+            .ToListAsync();
 
         cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(trips), new DistributedCacheEntryOptions
         {
@@ -36,6 +40,8 @@ public class TripsRepository(
         var trips = await dbContext.Trips
             .AsNoTracking()
             .Include(c => c.Routes)
+            .Include(c => c.Car)
+            .Include(c => c.Driver)
             .Where(c => c.CreatedUserId == userId)
             .ToListAsync();
 
