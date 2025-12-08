@@ -63,10 +63,10 @@ export default function TripForm({ trip, onSubmit, onCancel }: TripFormProps) {
                 traveledKM: trip.traveledKM,
                 consumptionLitersFuel: trip.consumptionLitersFuel,
                 createdUserId: trip.createdUserId || user?.id,
-                route: trip.route || [],
+                route: trip.routes || [],
             });
-            if (trip.route) {
-                setRoutePoints(trip.route);
+            if (trip.routes) {
+                setRoutePoints(trip.routes);
             }
         } else {
             const now = new Date();

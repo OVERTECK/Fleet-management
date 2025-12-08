@@ -28,7 +28,6 @@ import {
     LinearProgress,
 } from '@mui/material';
 import {
-    PictureAsPdf,
     TableChart,
     Upload,
     Download,
@@ -86,7 +85,7 @@ export default function ReportsPage() {
         end: '',
     });
     const [reportType, setReportType] = useState('trip');
-    const [exportFormat, setExportFormat] = useState('pdf');
+    const [exportFormat, setExportFormat] = useState('excel');
 
     const reportTemplates: ReportTemplate[] = [
         {
@@ -169,7 +168,7 @@ export default function ReportsPage() {
             setSelectedReport(report);
         }
 
-        const formatName = format === 'pdf' ? 'PDF' : format === 'excel' ? 'Excel' : format;
+        const formatName = format === 'excel' ? 'Excel' : format;
         alert(`Функционал экспорта в ${formatName}${report ? ` отчета "${report.name}"` : ''} будет реализован позже`);
     };
 
@@ -256,7 +255,7 @@ export default function ReportsPage() {
                     <Grid size={{ xs: 12, lg: 8 }}>
                         <Paper sx={{ p: 3, height: '100%' }}>
                             <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <PictureAsPdf /> Создание нового отчета
+                                <TableChart /> Создание нового отчета
                             </Typography>
 
                             <Alert severity="info" sx={{ mb: 3 }}>
@@ -337,7 +336,6 @@ export default function ReportsPage() {
                                                 value={exportFormat}
                                                 onChange={(e) => setExportFormat(e.target.value)}
                                             >
-                                                <MenuItem value="pdf">PDF документ</MenuItem>
                                                 <MenuItem value="excel">Excel таблица</MenuItem>
                                                 <MenuItem value="csv">CSV файл</MenuItem>
                                                 <MenuItem value="html">HTML страница</MenuItem>
@@ -375,7 +373,7 @@ export default function ReportsPage() {
                                     <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2 }}>
                                         <Button
                                             variant="contained"
-                                            startIcon={<PictureAsPdf />}
+                                            startIcon={<TableChart />}
                                             onClick={handleGenerateReport}
                                             size="large"
                                         >
@@ -573,13 +571,6 @@ export default function ReportsPage() {
                                             </IconButton>
                                             <IconButton
                                                 edge="end"
-                                                onClick={() => handleExport('pdf', report)}
-                                                title="Скачать PDF"
-                                            >
-                                                <PictureAsPdf />
-                                            </IconButton>
-                                            <IconButton
-                                                edge="end"
                                                 onClick={() => handleExport('excel', report)}
                                                 title="Скачать Excel"
                                             >
@@ -693,27 +684,6 @@ export default function ReportsPage() {
                             </Alert>
 
                             <Grid container spacing={2}>
-                                <Grid size={{ xs: 12, sm: 6 }}>
-                                    <Card>
-                                        <CardContent sx={{ textAlign: 'center' }}>
-                                            <PictureAsPdf sx={{ fontSize: 48, color: '#d32f2f', mb: 2 }} />
-                                            <Typography variant="subtitle1" gutterBottom>
-                                                PDF отчет
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary" gutterBottom>
-                                                Полноценный отчет с графиками и таблицами
-                                            </Typography>
-                                            <Button
-                                                variant="contained"
-                                                onClick={() => handleExport('pdf')}
-                                                fullWidth
-                                            >
-                                                Экспортировать
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-
                                 <Grid size={{ xs: 12, sm: 6 }}>
                                     <Card>
                                         <CardContent sx={{ textAlign: 'center' }}>
@@ -856,7 +826,7 @@ export default function ReportsPage() {
                                             <Button
                                                 variant="text"
                                                 size="small"
-                                                onClick={() => handleExport('pdf')}
+                                                onClick={() => handleExport('excel')}
                                             >
                                                 Пример
                                             </Button>
@@ -952,9 +922,9 @@ export default function ReportsPage() {
                     <Button
                         variant="contained"
                         startIcon={<Download />}
-                        onClick={() => selectedReport && handleExport('pdf', selectedReport)}
+                        onClick={() => selectedReport && handleExport('excel', selectedReport)}
                     >
-                        Скачать PDF
+                        Скачать Excel
                     </Button>
                     <Button
                         variant="outlined"

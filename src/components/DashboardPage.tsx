@@ -24,6 +24,7 @@ import {
     AttachMoney,
     Warning,
     TrendingUp,
+    Route,
 } from '@mui/icons-material';
 import { Car, Driver, Trip, MaintenanceRecord, Refueling } from '@/types';
 import { carService } from '@/services/carService';
@@ -243,8 +244,8 @@ export default function DashboardPage() {
                     <StatCard
                         title="Поездок"
                         value={stats.totalTrips}
-                        icon={<LocalGasStation sx={{ fontSize: 40 }} />}
-                        color="#ed6c02"
+                        icon={<Route sx={{ fontSize: 40 }} />}
+                        color="#aa02edff"
                     />
                 </Grid>
                 <Grid size={{ xs: 12, sm: 6, md: 3 }}>

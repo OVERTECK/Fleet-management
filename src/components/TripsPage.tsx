@@ -34,7 +34,6 @@ import {
     Upload,
     Download,
     TableChart,
-    PictureAsPdf,
     MoreVert,
     Map,
     Route,
@@ -140,7 +139,7 @@ export default function TripsPage() {
     };
 
     const handleViewMap = () => {
-        if (selectedMenuTrip?.route && selectedMenuTrip.route.length > 0) {
+        if (selectedMenuTrip?.routes && selectedMenuTrip.routes.length > 0) {
             alert('Просмотр маршрута на карте будет реализован позже');
         } else {
             alert('Для этой поездки нет данных о маршруте');
@@ -242,7 +241,7 @@ export default function TripsPage() {
                                 С маршрутом
                             </Typography>
                             <Typography variant="h5">
-                                {trips.filter(t => t.route && t.route.length > 0).length}
+                                {trips.filter(t => t.routes && t.routes.length > 0).length}
                             </Typography>
                         </CardContent>
                     </Card>
@@ -279,13 +278,6 @@ export default function TripsPage() {
                         value={reportEndDate}
                         onChange={(e) => setReportEndDate(e.target.value)}
                     />
-                    <Button
-                        variant="outlined"
-                        startIcon={<PictureAsPdf />}
-                        onClick={() => handleExport('pdf')}
-                    >
-                        Экспорт PDF
-                    </Button>
                     <Button
                         variant="outlined"
                         startIcon={<TableChart />}
@@ -344,10 +336,10 @@ export default function TripsPage() {
                             {filteredTrips.map((trip) => (
                                 <TableRow key={trip.id} hover>
                                     <TableCell>
-                                        <Chip label={trip.carId} size="small" />
+                                        <Chip label={trip.car.model + " " + trip.car.number} size="small" />
                                     </TableCell>
                                     <TableCell>
-                                        <Chip label={trip.driverId} size="small" variant="outlined" />
+                                        <Chip label={trip.driver.lastName + " " + trip.driver.name + ' ' + trip.driver.pathronymic} size="small" variant="outlined" />
                                     </TableCell>
                                     <TableCell>
                                         <Typography variant="body2">
@@ -374,10 +366,10 @@ export default function TripsPage() {
                                         />
                                     </TableCell>
                                     <TableCell>
-                                        {trip.route && trip.route.length > 0 ? (
+                                        {trip.routes && trip.routes.length > 0 ? (
                                             <Chip
                                                 icon={<Map />}
-                                                label={`${trip.route.length} точек`}
+                                                label={`${trip.routes.length} `}
                                                 size="small"
                                                 color="info"
                                                 variant="outlined"
@@ -431,12 +423,6 @@ export default function TripsPage() {
                         <Map fontSize="small" />
                     </ListItemIcon>
                     Просмотр маршрута
-                </MenuItem>
-                <MenuItem onClick={() => handleExport('pdf')}>
-                    <ListItemIcon>
-                        <PictureAsPdf fontSize="small" />
-                    </ListItemIcon>
-                    Экспорт в PDF
                 </MenuItem>
                 <MenuItem onClick={() => handleExport('excel')}>
                     <ListItemIcon>

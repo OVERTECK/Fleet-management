@@ -26,13 +26,15 @@ export interface Driver {
 export interface Trip {
     id: string;
     carId: string;
+    car: Car;
     driverId: string;
+    driver: Driver;
     timeStart: string;
     timeEnd: string;
     traveledKM: number;
     consumptionLitersFuel: number;
     createdUserId?: string;
-    route?: RoutePoint[];
+    routes?: RoutePoint[];
 }
 
 
