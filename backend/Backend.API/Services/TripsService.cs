@@ -79,13 +79,13 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRep
 
         var tripId = Guid.NewGuid();
 
-        var routes = request.Routes.Select(c => new RouteEntity
+        var routes = request.Route.Select(c => new RouteEntity
         {
             Id = Guid.NewGuid(),
             Latitude = c.Latitude,
             Longitude = c.Longitude,
-            Address = c.Address,
-            TimeStamp = c.TimeStamp,
+            // Address = c.Address,
+            // TimeStamp = c.TimeStamp,
             TripId = tripId,
         }).ToList();
 
@@ -146,7 +146,7 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRep
             TimeStart = request.TimeStart,
             TraveledKM = request.TraveledKM,
             CreatedUserId = request.CreatedUserId,
-            Routes = request.Routes,
+            Routes = request.Route,
         };
 
         await tripsRepository.Update(trip);

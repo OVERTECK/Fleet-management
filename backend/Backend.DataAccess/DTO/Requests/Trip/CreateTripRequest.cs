@@ -18,5 +18,5 @@ public class CreateTripRequest
 
     public required Guid CreatedUserId { get; set; }
 
-    public required List<CreateRouteRequest> Routes { get; set; }
+    public required List<CreateRouteRequest> Route { get; set; }
 }

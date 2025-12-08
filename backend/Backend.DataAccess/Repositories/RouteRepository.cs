@@ -30,8 +30,8 @@ public class RouteRepository(MyDbContext dbContext)
 
         await dbContext.Routes.Where(c => c.Id == route.Id)
             .ExecuteUpdateAsync(s => s
-                .SetProperty(c => c.TimeStamp, route.TimeStamp)
-                .SetProperty(c => c.Address, route.Address)
+                // .SetProperty(c => c.TimeStamp, route.TimeStamp)
+                // .SetProperty(c => c.Address, route.Address)
                 .SetProperty(c => c.Latitude, route.Latitude)
                 .SetProperty(c => c.Longitude, route.Longitude)
                 .SetProperty(c => c.TripId, route.TripId));

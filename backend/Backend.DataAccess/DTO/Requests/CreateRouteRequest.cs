@@ -6,7 +6,7 @@ public class CreateRouteRequest
 
     public required double Longitude { get; init; }
 
-    public required string Address { get; init; }
-
-    public required DateTime TimeStamp { get; init; }
+    // public required string Address { get; init; }
+    //
+    // public required DateTime TimeStamp { get; init; }
 }

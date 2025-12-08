@@ -29,11 +29,11 @@ public class RoutesService(ILogger<RoutesService> logger, RouteRepository reposi
         var route = new RouteEntity
         {
             Id = routeId,
-            TimeStamp = request.TimeStamp,
+            // TimeStamp = request.TimeStamp,
             Latitude = request.Latitude,
             Longitude = request.Longitude,
             TripId = routeId,
-            Address = request.Address,
+            // Address = request.Address,
         };
 
         await repository.Create(route);

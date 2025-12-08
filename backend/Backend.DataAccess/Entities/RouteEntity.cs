@@ -10,9 +10,9 @@ public class RouteEntity
 
     public required double Longitude { get; init; }
 
-    public required string Address { get; init; }
+    // public required string Address { get; init; }
 
-    public required DateTime TimeStamp { get; init; }
+    // public required DateTime TimeStamp { get; init; }
 
     public required Guid TripId { get; init; }
 

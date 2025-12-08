@@ -20,5 +20,5 @@ public class UpdateTripRequest
 
     public required Guid CreatedUserId { get; set; }
     
-    public required List<RouteEntity> Routes { get; set; }
+    public required List<RouteEntity> Route { get; set; }
 }
