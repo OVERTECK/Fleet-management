@@ -4,21 +4,21 @@ namespace Backend.DataAccess.DTO.Requests;
 
 public class UpdateTripRequest
 {
-    public required Guid Id { get; init; }
+    public required Guid Id { get; set; }
 
-    public required string CarId { get; init; }
+    public required string CarId { get; set; }
 
-    public required Guid DriverId { get; init; }
+    public required Guid DriverId { get; set; }
 
-    public required DateTime TimeStart { get; init; }
+    public required DateTime TimeStart { get; set; }
 
-    public required DateTime TimeEnd { get; init; }
+    public required DateTime TimeEnd { get; set; }
 
-    public required int TraveledKM  { get; init; }
+    public required int TraveledKM  { get; set; }
 
-    public required int ConsumptionLitersFuel { get; init; }
+    public required int ConsumptionLitersFuel { get; set; }
 
     public required Guid CreatedUserId { get; set; }
-    
-    public required List<RouteEntity> Route { get; set; }
+
+    public required List<CreateRouteRequest> Route { get; set; }
 }

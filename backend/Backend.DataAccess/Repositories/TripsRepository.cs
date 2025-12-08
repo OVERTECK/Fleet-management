@@ -21,7 +21,7 @@ public class TripsRepository(
         }
 
         var trips = await dbContext.Trips
-            .Include(c => c.Routes)
+            .Include(c => c.Route)
             .Include(c => c.Car)
             .Include(c => c.Driver)
             .ToListAsync();
@@ -39,7 +39,7 @@ public class TripsRepository(
     {
         var trips = await dbContext.Trips
             .AsNoTracking()
-            .Include(c => c.Routes)
+            .Include(c => c.Route)
             .Include(c => c.Car)
             .Include(c => c.Driver)
             .Where(c => c.CreatedUserId == userId)
@@ -64,16 +64,42 @@ public class TripsRepository(
 
     public async Task Update(TripEntity trip)
     {
-        await this.EnsureExists(trip.Id);
+        await using var transaction = await dbContext.Database.BeginTransactionAsync();
 
-        await dbContext.Trips.Where(c => c.Id == trip.Id)
-            .ExecuteUpdateAsync(s => s
-                .SetProperty(c => c.CarId, trip.CarId)
-                .SetProperty(c => c.DriverId, trip.DriverId)
-                .SetProperty(c => c.TimeStart, trip.TimeStart)
-                .SetProperty(c => c.TimeEnd, trip.TimeEnd)
-                .SetProperty(c => c.TraveledKM, trip.TraveledKM)
-                .SetProperty(c => c.ConsumptionLitersFuel, trip.ConsumptionLitersFuel));
+        try
+        {
+            await this.EnsureExists(trip.Id);
+
+            var searchedTrip = await dbContext.Trips
+                .Include(c => c.Route)
+                .FirstOrDefaultAsync(c => c.Id == trip.Id);
+
+            if (searchedTrip == null)
+            {
+                throw new NullReferenceException($"Trip with id {trip.Id} not found");
+            }
+
+            searchedTrip.Route.Clear();
+
+            await dbContext.Routes.AddRangeAsync(trip.Route);
+
+            await dbContext.SaveChangesAsync();
+
+            await dbContext.Trips.Where(c => c.Id == trip.Id)
+                .ExecuteUpdateAsync(s => s
+                    .SetProperty(c => c.CarId, trip.CarId)
+                    .SetProperty(c => c.DriverId, trip.DriverId)
+                    .SetProperty(c => c.TimeStart, trip.TimeStart)
+                    .SetProperty(c => c.TimeEnd, trip.TimeEnd)
+                    .SetProperty(c => c.TraveledKM, trip.TraveledKM)
+                    .SetProperty(c => c.ConsumptionLitersFuel, trip.ConsumptionLitersFuel));
+
+            await transaction.CommitAsync();
+        }
+        catch (Exception)
+        {
+            await transaction.RollbackAsync();
+        }
     }
 
     public async Task Delete(Guid id)

@@ -45,7 +45,7 @@ sealed class TripsUpdateHandler(ILogger<TripsUpdateHandler> logger, TripsService
         {
             logger.LogError(ex, ex.Message);
 
-            return Results.NotFound();
+            return Results.NotFound(ex.Message);
         }
         catch (Exception ex)
         {
