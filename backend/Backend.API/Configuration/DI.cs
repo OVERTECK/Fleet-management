@@ -7,6 +7,7 @@ using Backend.API.Features.GasStation;
 using Backend.API.Features.Login;
 using Backend.API.Features.MaintenanceRecords;
 using Backend.API.Features.Registration;
+using Backend.API.Features.Reports;
 using Backend.API.Features.Routes;
 using Backend.API.Features.Targets;
 using Backend.API.Features.Trips;
@@ -120,6 +121,7 @@ public static class DI
         services.AddScoped<LoginHandler>();
         services.AddScoped<RegistrationHandler>();
         services.AddScoped<GetMeHandler>();
+        services.AddScoped<TripsReportHandler>();
 
         return services;
     }
@@ -137,6 +139,7 @@ public static class DI
         services.AddScoped<UsersService>();
         services.AddScoped<JwtService>();
         services.AddScoped<HashService>();
+        services.AddScoped<ReportsService>();
 
         return services;
     }
