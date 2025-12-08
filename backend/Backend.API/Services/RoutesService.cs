@@ -24,12 +24,16 @@ public class RoutesService(ILogger<RoutesService> logger, RouteRepository reposi
     {
         logger.LogInformation($"{nameof(RouteEntity)}: Create route");
 
+        var routeId = Guid.NewGuid();
+
         var route = new RouteEntity
         {
-            Id = Guid.NewGuid(),
-            CountKM = request.CountKM,
-            End = request.End,
-            Start = request.Start,
+            Id = routeId,
+            TimeStamp = request.TimeStamp,
+            Latitude = request.Latitude,
+            Longitude = request.Longitude,
+            TripId = routeId,
+            Address = request.Address,
         };
 
         await repository.Create(route);

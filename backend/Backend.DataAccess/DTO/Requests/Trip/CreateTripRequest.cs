@@ -1,3 +1,5 @@
+using Backend.DataAccess.Entities;
+
 namespace Backend.DataAccess.DTO.Requests;
 
 public class CreateTripRequest
@@ -15,4 +17,6 @@ public class CreateTripRequest
     public required int ConsumptionLitersFuel { get; set; }
 
     public required Guid CreatedUserId { get; set; }
+
+    public required List<CreateRouteRequest> Routes { get; set; }
 }

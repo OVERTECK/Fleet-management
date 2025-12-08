@@ -30,9 +30,11 @@ public class RouteRepository(MyDbContext dbContext)
 
         await dbContext.Routes.Where(c => c.Id == route.Id)
             .ExecuteUpdateAsync(s => s
-                .SetProperty(c => c.Start, route.Start)
-                .SetProperty(c => c.End, route.End)
-                .SetProperty(c => c.CountKM, route.CountKM));
+                .SetProperty(c => c.TimeStamp, route.TimeStamp)
+                .SetProperty(c => c.Address, route.Address)
+                .SetProperty(c => c.Latitude, route.Latitude)
+                .SetProperty(c => c.Longitude, route.Longitude)
+                .SetProperty(c => c.TripId, route.TripId));
     }
 
     public async Task Delete(Guid id)

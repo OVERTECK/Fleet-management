@@ -21,4 +21,6 @@ public class TripEntity
     public required int ConsumptionLitersFuel { get; init; }
 
     public required Guid CreatedUserId { get; init; }
+
+    public required List<RouteEntity> Routes { get; init; }
 }

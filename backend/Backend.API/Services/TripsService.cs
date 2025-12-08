@@ -77,9 +77,21 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRep
 
         await carsRepository.Update(updatedCar);
 
-        var trip = new TripEntity
+        var tripId = Guid.NewGuid();
+
+        var routes = request.Routes.Select(c => new RouteEntity
         {
             Id = Guid.NewGuid(),
+            Latitude = c.Latitude,
+            Longitude = c.Longitude,
+            Address = c.Address,
+            TimeStamp = c.TimeStamp,
+            TripId = tripId,
+        }).ToList();
+
+        var trip = new TripEntity
+        {
+            Id = tripId,
             CarId = request.CarId,
             DriverId = request.DriverId,
             TimeEnd = request.TimeEnd,
@@ -87,6 +99,7 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRep
             TraveledKM = request.TraveledKM,
             ConsumptionLitersFuel = request.ConsumptionLitersFuel,
             CreatedUserId = request.CreatedUserId,
+            Routes = routes,
         };
 
         await tripsRepository.Create(trip);
@@ -133,6 +146,7 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRep
             TimeStart = request.TimeStart,
             TraveledKM = request.TraveledKM,
             CreatedUserId = request.CreatedUserId,
+            Routes = request.Routes,
         };
 
         await tripsRepository.Update(trip);

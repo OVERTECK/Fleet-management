@@ -2,9 +2,11 @@ namespace Backend.DataAccess.DTO.Requests;
 
 public class CreateRouteRequest
 {
-    public required DateTime Start { get; set; }
+    public required double Latitude { get; init; }
 
-    public required DateTime End { get; set; }
+    public required double Longitude { get; init; }
 
-    public required int CountKM { get; set; }
+    public required string Address { get; init; }
+
+    public required DateTime TimeStamp { get; init; }
 }
