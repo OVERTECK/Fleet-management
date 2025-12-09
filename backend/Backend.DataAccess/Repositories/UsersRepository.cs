@@ -8,6 +8,7 @@ public class UsersRepository(MyDbContext dbContext)
     public async Task<UserEntity?> GetById(Guid id)
     {
         var searchedUser = await dbContext.Users
+            .AsNoTracking()
             .Include(c => c.Role)
             .FirstOrDefaultAsync(c => c.Id == id);
 
@@ -17,6 +18,7 @@ public class UsersRepository(MyDbContext dbContext)
     public async Task<UserEntity?> GetByLogin(string login)
     {
         var searchedUser = await dbContext.Users
+            .AsNoTracking()
             .Include(u => u.Role)
             .FirstOrDefaultAsync(c => c.Login == login);
 

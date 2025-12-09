@@ -7,14 +7,14 @@ public class TargetsRepository(MyDbContext dbContext)
 {
     public async Task<List<TargetEntity>> GetAll()
     {
-        return await dbContext.Targets.ToListAsync();
+        return await dbContext.Targets.AsNoTracking().ToListAsync();
     }
 
     public async Task<TargetEntity?> GetById(Guid id)
     {
         await this.EnsureExists(id);
 
-        return await dbContext.Targets.FindAsync(id);
+        return await dbContext.Targets.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
     }
 
     public async Task Create(TargetEntity target)

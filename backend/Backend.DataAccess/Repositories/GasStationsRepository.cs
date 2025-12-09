@@ -7,12 +7,12 @@ public class GasStationsRepository(MyDbContext dbContext)
 {
     public async Task<List<GasStationEntity>> GetAll(CancellationToken cancellationToken = default)
     {
-        return await dbContext.GasStations.ToListAsync(cancellationToken);
+        return await dbContext.GasStations.AsNoTracking().ToListAsync(cancellationToken);
     }
 
     public async Task<GasStationEntity?> GetById(Guid id, CancellationToken cancellationToken = default)
     {
-        return await dbContext.GasStations.FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
+        return await dbContext.GasStations.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
     }
 
     public async Task Create(GasStationEntity gasStation, CancellationToken cancellationToken = default)
@@ -48,6 +48,11 @@ public class GasStationsRepository(MyDbContext dbContext)
 
     public async Task Delete(Guid id, CancellationToken cancellationToken = default)
     {
-        await dbContext.GasStations.Where(c => c.Id == id).ExecuteDeleteAsync(cancellationToken);
+        var countDeletedRows = await dbContext.GasStations.Where(c => c.Id == id).ExecuteDeleteAsync(cancellationToken);
+
+        if (countDeletedRows == 0)
+        {
+            throw new NullReferenceException($"Gas Station with VIN {id} not found");
+        }
     }
 }

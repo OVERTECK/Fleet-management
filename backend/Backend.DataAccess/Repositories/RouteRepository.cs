@@ -7,14 +7,14 @@ public class RouteRepository(MyDbContext dbContext)
 {
     public async Task<List<RouteEntity>> GetAll()
     {
-        return await dbContext.Routes.ToListAsync();
+        return await dbContext.Routes.AsNoTracking().ToListAsync();
     }
 
     public async Task<RouteEntity?> GetById(Guid id)
     {
         await this.EnsureExists(id);
 
-        return await dbContext.Routes.FindAsync(id);
+        return await dbContext.Routes.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
     }
 
     public async Task Create(RouteEntity route)

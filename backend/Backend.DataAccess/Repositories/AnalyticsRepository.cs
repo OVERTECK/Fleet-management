@@ -3,25 +3,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.DataAccess.Repositories;
 
-public class AnalyticsRepository
+public class AnalyticsRepository(MyDbContext _dbContext)
 {
-    private readonly MyDbContext _dbContext;
-
-    public AnalyticsRepository(MyDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
-    public async Task GetMileage()
-    {
-
-    }
-
     public async Task<List<CostRankingResponse>> GetCostRanking(int countRecords)
     {
         if (countRecords is <= 0 or > 100)
         {
-            throw new ArgumentOutOfRangeException("countRecords must be between 0 and 100");
+            throw new ArgumentOutOfRangeException("CountRecords must be between 0 and 100");
         }
 
         var sumMaintenanceRecords = await _dbContext.MaintenanceRecords

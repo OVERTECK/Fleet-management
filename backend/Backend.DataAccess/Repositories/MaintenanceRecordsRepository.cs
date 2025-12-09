@@ -8,6 +8,7 @@ public class MaintenanceRecordsRepository(MyDbContext dbContext)
     public async Task<List<MaintenanceRecordEntity>> GetAll(CancellationToken cancellationToken)
     {
         return await dbContext.MaintenanceRecords
+            .AsNoTracking()
             .Include(c => c.Car)
             .ToListAsync(cancellationToken);
     }
@@ -17,6 +18,7 @@ public class MaintenanceRecordsRepository(MyDbContext dbContext)
         await this.EnsureExists(id);
 
         var searchedMaintenanceRecord = await dbContext.MaintenanceRecords
+            .AsNoTracking()
             .Include(c => c.Car)
             .FirstOrDefaultAsync(c => c.Id == id, cancellationToken);
 

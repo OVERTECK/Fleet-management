@@ -8,12 +8,12 @@ public sealed class DriversRepository(MyDbContext dbContext)
 
     public async Task<List<DriverEntity>> GetAll()
     {
-        return await dbContext.Drivers.ToListAsync();
+        return await dbContext.Drivers.AsNoTracking().ToListAsync();
     }
 
     public async Task<DriverEntity?> GetById(Guid id)
     {
-        var searchedDriver = await dbContext.Drivers.FirstOrDefaultAsync(c => c.Id == id);
+        var searchedDriver = await dbContext.Drivers.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
 
         if (searchedDriver == null)
         {

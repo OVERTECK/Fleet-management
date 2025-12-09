@@ -7,12 +7,12 @@ public sealed class CarsRepository(MyDbContext dbContext)
 {
     public async Task<List<CarEntity>> GetAll()
     {
-        return await dbContext.Cars.ToListAsync();
+        return await dbContext.Cars.AsNoTracking().ToListAsync();
     }
 
     public async Task<CarEntity?> GetByVIN(string vin)
     {
-        var searchedCar = await dbContext.Cars.FirstOrDefaultAsync(c => c.VIN == vin);
+        var searchedCar = await dbContext.Cars.AsNoTracking().FirstOrDefaultAsync(c => c.VIN == vin);
 
         if (searchedCar == null)
         {

@@ -17,16 +17,17 @@ public class TripsRepository(
 
         if (!string.IsNullOrEmpty(cachedData))
         {
-            return JsonSerializer.Deserialize<List<TripEntity>>(cachedData) ?? new List<TripEntity>();
+            return JsonSerializer.Deserialize<List<TripEntity>>(cachedData) ?? [];
         }
 
         var trips = await dbContext.Trips
+            .AsNoTracking()
             .Include(c => c.Route)
             .Include(c => c.Car)
             .Include(c => c.Driver)
             .ToListAsync();
 
-        cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(trips), new DistributedCacheEntryOptions
+        await cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(trips), new DistributedCacheEntryOptions
         {
             AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2),
             SlidingExpiration = TimeSpan.FromMinutes(2),
@@ -52,7 +53,9 @@ public class TripsRepository(
     {
         await this.EnsureExists(id);
 
-        return await dbContext.Trips.FirstOrDefaultAsync(c => c.Id == id);
+        return await dbContext.Trips
+            .AsNoTracking()
+            .FirstOrDefaultAsync(c => c.Id == id);
     }
 
     public async Task Create(TripEntity trip)
@@ -68,8 +71,6 @@ public class TripsRepository(
 
         try
         {
-            await this.EnsureExists(trip.Id);
-
             var searchedTrip = await dbContext.Trips
                 .Include(c => c.Route)
                 .FirstOrDefaultAsync(c => c.Id == trip.Id);
@@ -104,9 +105,12 @@ public class TripsRepository(
 
     public async Task Delete(Guid id)
     {
-        await this.EnsureExists(id);
+        var countDeletedRows = await dbContext.Trips.Where(c => c.Id == id).ExecuteDeleteAsync();
 
-        await dbContext.Trips.Where(c => c.Id == id).ExecuteDeleteAsync();
+        if (countDeletedRows == 0)
+        {
+            throw new NullReferenceException($"Trip with id {id} not found");
+        }
     }
 
     public async Task EnsureExists(Guid id)
