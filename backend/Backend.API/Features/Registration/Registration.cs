@@ -8,7 +8,7 @@ namespace Backend.API.Features.Registration;
 
 public class Registration : IEndpoint
 {
-     public void MapEndpoint(IEndpointRouteBuilder app)
+    public void MapEndpoint(IEndpointRouteBuilder app)
     {
         app.MapPost("/registration", async (
             SignUpRequest signUpRequest,

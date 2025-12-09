@@ -23,7 +23,7 @@ using Serilog.Exceptions;
 
 namespace Backend.API.Configuration;
 
-public static class DI
+public static class Di
 {
     public static IServiceCollection AddConfiguration(this IServiceCollection services, IConfiguration configuration)
     {
@@ -34,6 +34,7 @@ public static class DI
             .AddJwtAuthentication(configuration)
             .AddMyHandlers()
             .AddServices()
+            .AddCacheServices()
             .AddRepositories()
             .AddRedis(configuration)
             .AddMyDbContext(configuration)
@@ -41,10 +42,10 @@ public static class DI
             {
                 options.Cookie.Name = ".AspNetCore.Antiforgery.7iEtVOfI_Ps";
                 options.Cookie.HttpOnly = true;
-                // options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
                 options.HeaderName = "X-CSRF-TOKEN";
+                options.SuppressXFrameOptionsHeader = false;
             })
-            .AddEndpoints(typeof(DI).Assembly);
+            .AddEndpoints(typeof(Di).Assembly);
     }
 
     private static IServiceCollection AddOpenApiSpec(this IServiceCollection services)
@@ -190,6 +191,13 @@ public static class DI
         {
             options.Configuration = configuration.GetConnectionString("Redis");
         });
+
+        return services;
+    }
+
+    private static IServiceCollection AddCacheServices(this IServiceCollection services)
+    {
+        services.AddScoped<TripsCacheService>();
 
         return services;
     }

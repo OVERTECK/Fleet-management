@@ -6,32 +6,16 @@ using Microsoft.Extensions.Caching.Distributed;
 namespace Backend.DataAccess.Repositories;
 
 public class TripsRepository(
-    MyDbContext dbContext,
-    IDistributedCache cache)
+    MyDbContext dbContext)
 {
     public async Task<List<TripEntity>> GetAll()
     {
-        const string cacheKey = "trips_";
-
-        var cachedData = await cache.GetStringAsync(cacheKey);
-
-        if (!string.IsNullOrEmpty(cachedData))
-        {
-            return JsonSerializer.Deserialize<List<TripEntity>>(cachedData) ?? [];
-        }
-
         var trips = await dbContext.Trips
             .AsNoTracking()
             .Include(c => c.Route)
             .Include(c => c.Car)
             .Include(c => c.Driver)
             .ToListAsync();
-
-        await cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(trips), new DistributedCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(2),
-            SlidingExpiration = TimeSpan.FromMinutes(2),
-        });
 
         return trips;
     }
@@ -111,6 +95,13 @@ public class TripsRepository(
         {
             throw new NullReferenceException($"Trip with id {id} not found");
         }
+    }
+
+    public async Task AddRange(List<TripEntity> trips)
+    {
+        await dbContext.Trips.AddRangeAsync(trips);
+
+        await dbContext.SaveChangesAsync();
     }
 
     public async Task EnsureExists(Guid id)

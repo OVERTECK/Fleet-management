@@ -5,7 +5,11 @@ using Backend.DataAccess.Repositories;
 
 namespace Backend.API.Services;
 
-public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRepository, CarsRepository carsRepository)
+public class TripsService(
+    ILogger<TripsService> logger,
+    TripsRepository tripsRepository,
+    CarsRepository carsRepository,
+    TripsCacheService tripsCacheService)
 {
     public async Task<List<TripEntity>> GetAll(IHttpContextAccessor contextAccessor)
     {
@@ -26,7 +30,7 @@ public class TripsService(ILogger<TripsService> logger, TripsRepository tripsRep
             case "Администратор":
             case "Диспетчер":
             {
-                return await tripsRepository.GetAll();
+                return await tripsCacheService.GetAll();
             }
 
             case "Водитель":
