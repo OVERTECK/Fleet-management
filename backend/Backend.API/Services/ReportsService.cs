@@ -4,7 +4,12 @@ namespace Backend.API.Services;
 
 public class ReportsService(TripsService tripsService)
 {
-    public async Task<IResult> CreateReport<T>(IHttpContextAccessor httpContextAccessor)
+    /// <summary>
+    /// Метод создает и экспортирует поездки в зависимости от роли.
+    /// </summary>
+    /// <param name="httpContextAccessor"></param>
+    /// <returns></returns>
+    public async Task<IResult> CreateReport(IHttpContextAccessor httpContextAccessor)
     {
         using (var workbook = new XLWorkbook())
         {

@@ -4,6 +4,7 @@ using Backend.API.Features.Analytics;
 using Backend.API.Features.Cars;
 using Backend.API.Features.Drivers;
 using Backend.API.Features.GasStation;
+using Backend.API.Features.Imports;
 using Backend.API.Features.Login;
 using Backend.API.Features.MaintenanceRecords;
 using Backend.API.Features.Registration;
@@ -36,6 +37,13 @@ public static class DI
             .AddRepositories()
             .AddRedis(configuration)
             .AddMyDbContext(configuration)
+            .AddAntiforgery(options =>
+            {
+                options.Cookie.Name = ".AspNetCore.Antiforgery.7iEtVOfI_Ps";
+                options.Cookie.HttpOnly = true;
+                // options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.HeaderName = "X-CSRF-TOKEN";
+            })
             .AddEndpoints(typeof(DI).Assembly);
     }
 
@@ -122,6 +130,7 @@ public static class DI
         services.AddScoped<RegistrationHandler>();
         services.AddScoped<GetMeHandler>();
         services.AddScoped<TripsReportHandler>();
+        services.AddScoped<TripsImportHandler>();
 
         return services;
     }

@@ -18,12 +18,23 @@ public class TripsReport : IEndpoint
     }
 }
 
-sealed class TripsReportHandler(ReportsService reportsService)
+sealed class TripsReportHandler(
+    ReportsService reportsService,
+    ILogger<TripsReportHandler> logger)
 {
     public async Task<IResult> Handle(IHttpContextAccessor httpContextAccessor)
     {
-        var file = await reportsService.CreateReport<TripEntity>(httpContextAccessor);
+        try
+        {
+            var file = await reportsService.CreateReport(httpContextAccessor);
 
-        return file;
+            return file;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, ex.Message);
+
+            return Results.InternalServerError();
+        }
     }
 }

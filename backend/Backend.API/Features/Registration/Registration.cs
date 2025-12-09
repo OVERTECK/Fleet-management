@@ -1,6 +1,7 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
 using Backend.DataAccess.DTO.Requests;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.API.Features.Registration;
@@ -12,9 +13,10 @@ public class Registration : IEndpoint
         app.MapPost("/registration", async (
             SignUpRequest signUpRequest,
             RegistrationHandler handler,
-            HttpResponse response) =>
+            HttpContext httpContext,
+            IAntiforgery antiforgery) =>
         {
-            return await handler.Handle(signUpRequest, response);
+            return await handler.Handle(signUpRequest, httpContext, antiforgery);
         }).WithTags("Authentication");
     }
 }
@@ -25,7 +27,8 @@ sealed class RegistrationHandler(
 {
     public async Task<IResult> Handle(
         SignUpRequest signUpRequest,
-        HttpResponse response)
+        HttpContext httpContext,
+        IAntiforgery antiforgery)
     {
         try
         {
@@ -33,13 +36,16 @@ sealed class RegistrationHandler(
 
             var token = await usersService.SignUp(signUpRequest);
 
-            response.Cookies.Append("token", token);
+            httpContext.Response.Cookies.Append("token", token);
+
+            var antiToken = antiforgery.GetAndStoreTokens(httpContext);
 
             var user = await usersService.GetByLogin(signUpRequest.Login);
 
             return Results.Ok(new
             {
-                Id = user.Id,
+                id = user.Id,
+                csrfToken = antiToken.RequestToken,
                 login = user.Login,
                 role = user.Role,
                 roleId = user.RoleId,

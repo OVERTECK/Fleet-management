@@ -1,6 +1,8 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
 using Backend.DataAccess.DTO.Requests;
+using Microsoft.AspNetCore.Antiforgery;
+using Microsoft.AspNetCore.Components.Forms;
 
 namespace Backend.API.Features.Login;
 
@@ -11,9 +13,10 @@ public class Login : IEndpoint
         app.MapPost("/login", async (
             SignInRequest signInRequest,
             LoginHandler handler,
-            HttpResponse response) =>
+            HttpContext httpContext,
+            IAntiforgery antiforgery) =>
         {
-            return await handler.Handle(signInRequest, response);
+            return await handler.Handle(signInRequest, httpContext, antiforgery);
         }).WithTags("Authentication");
     }
 }
@@ -24,7 +27,8 @@ sealed class LoginHandler(
 {
     public async Task<IResult> Handle(
         SignInRequest signInRequest,
-        HttpResponse response)
+        HttpContext httpContext,
+        IAntiforgery antiforgery)
     {
         try
         {
@@ -32,13 +36,16 @@ sealed class LoginHandler(
 
             var token = await usersService.Login(signInRequest);
 
-            response.Cookies.Append("token", token);
+            httpContext.Response.Cookies.Append("token", token);
+
+            var antiToken = antiforgery.GetAndStoreTokens(httpContext);
 
             var user = await usersService.GetByLogin(signInRequest.Login);
 
             return Results.Ok(new
             {
-                Id = user.Id,
+                id = user.Id,
+                csrfToken = antiToken.RequestToken,
                 login = user.Login,
                 role = user.Role,
                 roleId = user.RoleId,

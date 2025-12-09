@@ -19,11 +19,15 @@ public static class AppExtensions
 
         app.UseCors("AllowFrontend");
 
+
         app.UseAuthentication();
         app.UseAuthorization();
 
+        app.UseAntiforgery();
+
         app.UseSwagger();
         app.UseSwaggerUI();
+
         app.MapEndpoints();
 
         return app;
