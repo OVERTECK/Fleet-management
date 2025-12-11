@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Box,
     Grid,
@@ -21,11 +21,9 @@ import {
     Alert,
     Snackbar,
     TextField,
-    Menu,
-    MenuItem,
     Card,
     CardContent,
-    ListItemIcon,
+    CircularProgress,
 } from '@mui/material';
 import {
     Edit,
@@ -34,13 +32,10 @@ import {
     Upload,
     Download,
     TableChart,
-    MoreVert,
-    Map,
-    Route,
-    Timeline,
 } from '@mui/icons-material';
 import { Trip, CreateTripRequest } from '@/types';
 import { tripService } from '@/services/tripService';
+import { reportService } from '@/services/reportService';
 import TripForm from '@/components/forms/TripForm';
 import { useAuth } from '@/components/AuthProvider';
 
@@ -49,13 +44,14 @@ export default function TripsPage() {
     const [open, setOpen] = useState(false);
     const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
     const [loading, setLoading] = useState(true);
+    const [exportLoading, setExportLoading] = useState(false);
+    const [importLoading, setImportLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState<string | null>(null);
-    const [reportStartDate, setReportStartDate] = useState('');
-    const [reportEndDate, setReportEndDate] = useState('');
-    const [menuAnchor, setMenuAnchor] = useState<null | HTMLElement>(null);
-    const [selectedMenuTrip, setSelectedMenuTrip] = useState<Trip | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [reportDateRange, setReportDateRange] = useState({
+        start: '',
+        end: '',
+    });
 
     const { user } = useAuth();
 
@@ -119,38 +115,70 @@ export default function TripsPage() {
         }
     };
 
-    const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, trip: Trip) => {
-        setMenuAnchor(event.currentTarget);
-        setSelectedMenuTrip(trip);
-    };
+    const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (!file) return;
 
-    const handleMenuClose = () => {
-        setMenuAnchor(null);
-        setSelectedMenuTrip(null);
-    };
-
-    const handleExport = (format: string) => {
-        alert(`Функционал экспорта в ${format} будет реализован позже`);
-        handleMenuClose();
-    };
-
-    const handleImport = () => {
-        alert('Функционал импорта будет реализован позже');
-    };
-
-    const handleViewMap = () => {
-        if (selectedMenuTrip?.routes && selectedMenuTrip.routes.length > 0) {
-            alert('Просмотр маршрута на карте будет реализован позже');
-        } else {
-            alert('Для этой поездки нет данных о маршруте');
+        if (!file.name.match(/\.(xlsx|xls)$/i)) {
+            setError('Пожалуйста, выберите файл Excel (.xlsx или .xls)');
+            return;
         }
-        handleMenuClose();
+
+        setImportLoading(true);
+
+        try {
+            const result = await reportService.importTrips(file);
+
+            setSuccess(`Успешно импортировано ${result.importedCount || 'данные'} поездок`);
+
+            loadTrips();
+
+        } catch (error: any) {
+            console.error('Error importing trips:', error);
+            setError(error.response?.data?.message || 'Ошибка при импорте данных');
+        } finally {
+            setImportLoading(false);
+            event.target.value = '';
+        }
+    };
+
+    const handleExport = async (filtered = false) => {
+        setExportLoading(true);
+
+        try {
+            let blob;
+
+            if (filtered && reportDateRange.start && reportDateRange.end) {
+                blob = await reportService.exportTripsByDate(reportDateRange.start, reportDateRange.end);
+            } else {
+                blob = await reportService.exportTrips();
+            }
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filtered
+                ? `поездки_${reportDateRange.start}_${reportDateRange.end}.xlsx`
+                : 'все_поездки.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            setSuccess('Экспорт успешно выполнен');
+
+        } catch (error: any) {
+            console.error('Error exporting trips:', error);
+            setError(error.response?.data?.message || 'Ошибка при экспорте данных');
+        } finally {
+            setExportLoading(false);
+        }
     };
 
     const filterTrips = () => {
-        if (!reportStartDate || !reportEndDate) return trips;
-        const start = new Date(reportStartDate);
-        const end = new Date(reportEndDate);
+        if (!reportDateRange.start || !reportDateRange.end) return trips;
+        const start = new Date(reportDateRange.start);
+        const end = new Date(reportDateRange.end);
         end.setHours(23, 59, 59);
         return trips.filter(t => new Date(t.timeStart) >= start && new Date(t.timeStart) <= end);
     };
@@ -163,7 +191,7 @@ export default function TripsPage() {
     if (loading) {
         return (
             <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 200 }}>
-                <Typography>Загрузка поездок...</Typography>
+                <CircularProgress />
             </Box>
         );
     }
@@ -179,10 +207,18 @@ export default function TripsPage() {
                 <Box sx={{ display: 'flex', gap: 2 }}>
                     <Button
                         variant="outlined"
-                        startIcon={<Upload />}
-                        onClick={handleImport}
+                        startIcon={importLoading ? <CircularProgress size={20} color="inherit" /> : <Upload />}
+                        component="label"
+                        disabled={importLoading}
                     >
-                        Импорт
+                        {importLoading ? 'Импорт...' : 'Импорт Excel'}
+                        <input
+                            type="file"
+                            hidden
+                            accept=".xlsx,.xls"
+                            onChange={handleImport}
+                            disabled={importLoading}
+                        />
                     </Button>
                     <Button
                         variant="contained"
@@ -238,22 +274,22 @@ export default function TripsPage() {
                     <Card>
                         <CardContent>
                             <Typography color="textSecondary" variant="body2">
-                                С маршрутом
+                                За период
                             </Typography>
                             <Typography variant="h5">
-                                {trips.filter(t => t.routes && t.routes.length > 0).length}
+                                {filteredTrips.length}
                             </Typography>
                         </CardContent>
                     </Card>
                 </Grid>
             </Grid>
 
-            {/* Фильтры для отчетов */}
+            {/* Фильтры для экспорта */}
             <Paper sx={{ p: 2, mb: 3 }}>
                 <Typography variant="h6" gutterBottom>
-                    📅 Фильтры для отчета
+                    📅 Экспорт поездок в Excel
                 </Typography>
-                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                     <TextField
                         label="С даты"
                         type="date"
@@ -263,8 +299,8 @@ export default function TripsPage() {
                                 shrink: true
                             }
                         }}
-                        value={reportStartDate}
-                        onChange={(e) => setReportStartDate(e.target.value)}
+                        value={reportDateRange.start}
+                        onChange={(e) => setReportDateRange({ ...reportDateRange, start: e.target.value })}
                     />
                     <TextField
                         label="По дату"
@@ -275,23 +311,29 @@ export default function TripsPage() {
                                 shrink: true
                             }
                         }}
-                        value={reportEndDate}
-                        onChange={(e) => setReportEndDate(e.target.value)}
+                        value={reportDateRange.end}
+                        onChange={(e) => setReportDateRange({ ...reportDateRange, end: e.target.value })}
                     />
                     <Button
                         variant="outlined"
-                        startIcon={<TableChart />}
-                        onClick={() => handleExport('excel')}
+                        startIcon={exportLoading ? <CircularProgress size={20} color="inherit" /> : <TableChart />}
+                        onClick={() => handleExport(true)}
+                        disabled={exportLoading || !reportDateRange.start || !reportDateRange.end}
                     >
-                        Экспорт Excel
+                        Экспорт за период
                     </Button>
-                    {(reportStartDate || reportEndDate) && (
+                    <Button
+                        variant="contained"
+                        startIcon={exportLoading ? <CircularProgress size={20} color="inherit" /> : <Download />}
+                        onClick={() => handleExport(false)}
+                        disabled={exportLoading}
+                    >
+                        Экспорт всех
+                    </Button>
+                    {(reportDateRange.start || reportDateRange.end) && (
                         <Button
                             size="small"
-                            onClick={() => {
-                                setReportStartDate('');
-                                setReportEndDate('');
-                            }}
+                            onClick={() => setReportDateRange({ start: '', end: '' })}
                         >
                             Сбросить фильтры
                         </Button>
@@ -305,7 +347,7 @@ export default function TripsPage() {
                         Поездки не найдены
                     </Typography>
                     <Typography color="textSecondary" sx={{ mb: 2 }}>
-                        {reportStartDate || reportEndDate ?
+                        {reportDateRange.start || reportDateRange.end ?
                             'Нет поездок за выбранный период' :
                             'Добавьте первую поездку в систему'}
                     </Typography>
@@ -328,7 +370,6 @@ export default function TripsPage() {
                                 <TableCell>Пробег</TableCell>
                                 <TableCell>Расход</TableCell>
                                 <TableCell>л/100км</TableCell>
-                                <TableCell>Маршрут</TableCell>
                                 <TableCell>Действия</TableCell>
                             </TableRow>
                         </TableHead>
@@ -366,21 +407,6 @@ export default function TripsPage() {
                                         />
                                     </TableCell>
                                     <TableCell>
-                                        {trip.routes && trip.routes.length > 0 ? (
-                                            <Chip
-                                                icon={<Map />}
-                                                label={`${trip.routes.length} `}
-                                                size="small"
-                                                color="info"
-                                                variant="outlined"
-                                            />
-                                        ) : (
-                                            <Typography variant="caption" color="textSecondary">
-                                                Нет данных
-                                            </Typography>
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
                                         <IconButton
                                             onClick={() => handleEdit(trip)}
                                             color="primary"
@@ -390,11 +416,12 @@ export default function TripsPage() {
                                             <Edit />
                                         </IconButton>
                                         <IconButton
-                                            onClick={(e) => handleMenuOpen(e, trip)}
+                                            onClick={() => handleDelete(trip.id)}
+                                            color="error"
                                             size="small"
-                                            title="Дополнительно"
+                                            title="Удалить"
                                         >
-                                            <MoreVert />
+                                            <Delete />
                                         </IconButton>
                                     </TableCell>
                                 </TableRow>
@@ -404,6 +431,7 @@ export default function TripsPage() {
                 </TableContainer>
             )}
 
+            {/* Диалог для создания/редактирования поездки */}
             <Dialog open={open} onClose={handleClose} maxWidth="lg" fullWidth>
                 <DialogTitle>
                     {selectedTrip ? '✏️ Редактирование поездки' : '➕ Создание новой поездки'}
@@ -412,31 +440,6 @@ export default function TripsPage() {
                     <TripForm trip={selectedTrip} onSubmit={handleSubmit} onCancel={handleClose} />
                 </DialogContent>
             </Dialog>
-
-            <Menu
-                anchorEl={menuAnchor}
-                open={Boolean(menuAnchor)}
-                onClose={handleMenuClose}
-            >
-                <MenuItem onClick={handleViewMap}>
-                    <ListItemIcon>
-                        <Map fontSize="small" />
-                    </ListItemIcon>
-                    Просмотр маршрута
-                </MenuItem>
-                <MenuItem onClick={() => handleExport('excel')}>
-                    <ListItemIcon>
-                        <TableChart fontSize="small" />
-                    </ListItemIcon>
-                    Экспорт в Excel
-                </MenuItem>
-                <MenuItem onClick={() => selectedMenuTrip && handleDelete(selectedMenuTrip.id)} sx={{ color: 'error.main' }}>
-                    <ListItemIcon sx={{ color: 'error.main' }}>
-                        <Delete fontSize="small" />
-                    </ListItemIcon>
-                    Удалить
-                </MenuItem>
-            </Menu>
 
             <Snackbar open={!!error} autoHideDuration={6000} onClose={() => setError(null)}>
                 <Alert onClose={() => setError(null)} severity="error" sx={{ width: '100%' }}>

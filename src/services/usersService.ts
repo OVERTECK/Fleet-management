@@ -11,13 +11,12 @@ export const usersService = {
     async login(credentials: { login: string; password: string }): Promise<User> {
         try {
             const response = await api.post('/login', credentials, {
-                withCredentials: true, // Убедитесь, что куки отправляются
+                withCredentials: true,
             });
 
             console.log('Login response headers:', response.headers);
             console.log('Login response data:', response.data);
 
-            // Сохраняем минимальную информацию
             if (response.data) {
                 const userData = {
                     id: response.data.id || '',
@@ -26,6 +25,7 @@ export const usersService = {
                     roleId: response.data.roleId || 0,
                 };
                 localStorage.setItem('currentUser', JSON.stringify(userData));
+                localStorage.setItem('csrfToken', response.data.csrfToken || '');
             }
 
             return response.data;
@@ -51,6 +51,7 @@ export const usersService = {
                     roleId: response.data.roleId || 0,
                 };
                 localStorage.setItem('currentUser', JSON.stringify(userInfo));
+                localStorage.setItem('csrfToken', response.data.csrfToken || '');
             }
 
             return response.data;
@@ -62,7 +63,6 @@ export const usersService = {
 
     async getCurrentUser(): Promise<User> {
         try {
-            // Проверяем localStorage
             const cached = localStorage.getItem('currentUser');
             if (cached) {
                 try {
@@ -72,7 +72,6 @@ export const usersService = {
                 }
             }
 
-            // Запрашиваем с сервера
             const response = await api.get('/users/me', {
                 withCredentials: true,
             });
@@ -85,6 +84,7 @@ export const usersService = {
                     roleId: response.data.roleId || 0,
                 };
                 localStorage.setItem('currentUser', JSON.stringify(userData));
+                localStorage.setItem('csrfToken', response.data.csrfToken || '');
                 return userData;
             }
 
