@@ -19,7 +19,6 @@ public static class AppExtensions
 
         app.UseCors("AllowFrontend");
 
-
         app.UseAuthentication();
         app.UseAuthorization();
 

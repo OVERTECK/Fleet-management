@@ -38,13 +38,7 @@ public static class Di
             .AddRepositories()
             .AddRedis(configuration)
             .AddMyDbContext(configuration)
-            .AddAntiforgery(options =>
-            {
-                options.Cookie.Name = ".AspNetCore.Antiforgery.7iEtVOfI_Ps";
-                options.Cookie.HttpOnly = true;
-                options.HeaderName = "X-CSRF-TOKEN";
-                options.SuppressXFrameOptionsHeader = false;
-            })
+            .AddMyAntiforgery()
             .AddEndpoints(typeof(Di).Assembly);
     }
 
@@ -132,6 +126,7 @@ public static class Di
         services.AddScoped<GetMeHandler>();
         services.AddScoped<TripsReportHandler>();
         services.AddScoped<TripsImportHandler>();
+        services.AddScoped<CommonReportHandler>();
 
         return services;
     }
@@ -198,6 +193,19 @@ public static class Di
     private static IServiceCollection AddCacheServices(this IServiceCollection services)
     {
         services.AddScoped<TripsCacheService>();
+
+        return services;
+    }
+
+    private static IServiceCollection AddMyAntiforgery(this IServiceCollection services)
+    {
+        services.AddAntiforgery(options =>
+        {
+            options.Cookie.Name = ".AspNetCore.Antiforgery.7iEtVOfI_Ps";
+            options.Cookie.HttpOnly = true;
+            options.HeaderName = "X-CSRF-TOKEN";
+            options.SuppressXFrameOptionsHeader = false;
+        });
 
         return services;
     }
