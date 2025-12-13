@@ -109,7 +109,6 @@ export default function TripForm({ trip, onSubmit, onCancel }: TripFormProps) {
     };
 
     const handleFormSubmit = (data: CreateTripRequest) => {
-        // Автоматически рассчитываем пробег по маршруту
         const distance = calculateTotalDistance(routePoints);
         const finalData = {
             ...data,
@@ -127,7 +126,6 @@ export default function TripForm({ trip, onSubmit, onCancel }: TripFormProps) {
     const handleRoutePointsChange = (points: RoutePoint[]) => {
         setRoutePoints(points);
 
-        // Автоматически обновляем поле пробега
         const distance = calculateTotalDistance(points);
         if (distance > 0) {
             setValue('traveledKM', Math.round(distance));
@@ -144,13 +142,11 @@ export default function TripForm({ trip, onSubmit, onCancel }: TripFormProps) {
     const selectedCar = cars.find(c => c.vin === carId);
     const traveledKM = watch('traveledKM') || 0;
 
-    // Функция для расчета расхода топлива на основе пробега и среднего расхода автомобиля
     const calculateEstimatedFuel = () => {
         if (!selectedCar || traveledKM <= 0) return 0;
 
-        // Предполагаем средний расход 10 л/100км, если нет данных
         const avgConsumption = selectedCar.totalKM > 1000 ?
-            (selectedCar.totalKM / 1000) : 10; // Упрощенная логика
+            (selectedCar.totalKM / 1000) : 10;
         return (traveledKM * avgConsumption / 100).toFixed(1);
     };
 

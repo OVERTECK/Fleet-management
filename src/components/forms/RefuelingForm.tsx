@@ -35,15 +35,13 @@ export default function RefuelingForm({ refueling, onSubmit, onCancel }: Refueli
         loadCars();
 
         if (refueling) {
-            // При редактировании
             reset({
                 carId: refueling.carId,
                 refilledLiters: refueling.refilledLiters,
                 price: refueling.price,
-                date: refueling.date.split('T')[0], // Безопасно обрабатываем дату
+                date: refueling.date.split('T')[0],
             });
         } else {
-            // При создании - текущая дата
             reset({
                 carId: '',
                 refilledLiters: 0,
@@ -53,7 +51,6 @@ export default function RefuelingForm({ refueling, onSubmit, onCancel }: Refueli
         }
     }, [refueling, reset]);
 
-    // Функция для преобразования в формат бэкенда
     const formatDateForBackend = (dateString: string): string => {
         const date = new Date(dateString);
         return date.toISOString();
@@ -69,7 +66,6 @@ export default function RefuelingForm({ refueling, onSubmit, onCancel }: Refueli
     };
 
     const handleFormSubmit = (data: CreateRefuelingRequest) => {
-        // Преобразуем даты в формат бэкенда перед отправкой
         const formattedData = {
             ...data,
             date: formatDateForBackend(data.date),

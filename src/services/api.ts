@@ -7,13 +7,11 @@ export const api = axios.create({
     headers: {
         'Content-Type': 'application/json',
     },
-    withCredentials: true, // КРИТИЧЕСКИ ВАЖНО для отправки кук
+    withCredentials: true,
 });
 
-// Убираем лишние интерцепторы - они могут мешать
 api.interceptors.request.use(
     (config) => {
-        // Только минимальное логирование
         return config;
     },
     (error) => {

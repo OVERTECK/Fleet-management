@@ -51,15 +51,13 @@ export default function MaintenanceForm({ record, onSubmit, onCancel }: Maintena
         loadCars();
 
         if (record) {
-            // При редактировании
             reset({
                 carId: record.carId,
                 typeWork: record.typeWork,
                 price: record.price,
-                date: record.date.split('T')[0], // Безопасно обрабатываем дату
+                date: record.date.split('T')[0],
             });
         } else {
-            // При создании - текущая дата
             reset({
                 carId: '',
                 typeWork: '',
@@ -69,7 +67,6 @@ export default function MaintenanceForm({ record, onSubmit, onCancel }: Maintena
         }
     }, [record, reset]);
 
-    // Функция для преобразования в формат бэкенда
     const formatDateForBackend = (dateString: string): string => {
         const date = new Date(dateString);
         return date.toISOString();
@@ -85,7 +82,6 @@ export default function MaintenanceForm({ record, onSubmit, onCancel }: Maintena
     };
 
     const handleFormSubmit = (data: CreateMaintenanceRecordRequest) => {
-        // Преобразуем даты в формат бэкенда перед отправкой
         const formattedData = {
             ...data,
             date: formatDateForBackend(data.date),

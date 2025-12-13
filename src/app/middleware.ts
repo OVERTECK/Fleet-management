@@ -7,13 +7,11 @@ export function middleware(request: NextRequest) {
 
     console.log('Middleware - Path:', pathname, 'Has token:', !!token);
 
-    // Если пользователь не аутентифицирован и пытается получить доступ к защищенным маршрутам
     if (!token && !pathname.startsWith('/auth') && pathname !== '/') {
         console.log('Redirecting to auth - no token');
         return NextResponse.redirect(new URL('/auth', request.url));
     }
 
-    // Если пользователь аутентифицирован и пытается получить доступ к auth
     if (token && pathname.startsWith('/auth')) {
         console.log('Redirecting to dashboard - has token');
         return NextResponse.redirect(new URL('/dashboard', request.url));

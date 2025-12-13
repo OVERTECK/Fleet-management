@@ -27,12 +27,10 @@ export default function LoginForm({ onSuccess, onError }: LoginFormProps) {
 
             console.log('Login successful, user:', user);
 
-            // Обновляем контекст
             login(user);
 
             onSuccess('Вход выполнен успешно!');
 
-            // Немедленный редирект
             router.push('/dashboard');
 
         } catch (error: any) {

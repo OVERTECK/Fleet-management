@@ -23,7 +23,6 @@ interface DriverFormProps {
     onCancel: () => void;
 }
 
-// Доступные категории прав
 const licenseCategories = [
     'A', 'A1', 'B', 'B1', 'C', 'C1', 'D', 'D1', 'BE', 'CE', 'C1E', 'DE', 'D1E', 'M', 'Tm', 'Tb'
 ];
@@ -42,19 +41,16 @@ export default function DriverForm({ driver, onSubmit, onCancel }: DriverFormPro
 
     useEffect(() => {
         if (driver) {
-            // При редактировании - заполняем форму данными водителя
             reset({
                 name: driver.name,
                 lastName: driver.lastName,
-                pathronymic: driver.pathronymic || '', // Изменено поле
+                pathronymic: driver.pathronymic || '',
                 contactData: driver.contactData,
                 categoryDrive: driver.categoryDrive,
             });
-            // Парсим категории из строки в массив
             const categories = driver.categoryDrive.split(',').map(cat => cat.trim()).filter(Boolean);
             setSelectedCategories(categories);
         } else {
-            // При создании - пустая форма
             reset({
                 name: '',
                 lastName: '',
@@ -66,7 +62,6 @@ export default function DriverForm({ driver, onSubmit, onCancel }: DriverFormPro
         }
     }, [driver, reset]);
 
-    // Обработчик изменения выбранных категорий
     const handleCategoryChange = (event: SelectChangeEvent<string[]>) => {
         const value = event.target.value;
         const categories = typeof value === 'string' ? value.split(',') : value;
@@ -117,7 +112,7 @@ export default function DriverForm({ driver, onSubmit, onCancel }: DriverFormPro
                         fullWidth
                         label="Отчество"
                         variant="outlined"
-                        {...register('pathronymic')} // Изменено поле
+                        {...register('pathronymic')}
                         error={!!errors.pathronymic}
                         helperText={errors.pathronymic?.message as string}
                     />

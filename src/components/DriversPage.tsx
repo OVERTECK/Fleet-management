@@ -83,14 +83,12 @@ export default function DriversPage() {
         console.log('Submitting driver data:', driverData);
         try {
             if (selectedDriver) {
-                // При обновлении отправляем полный объект Driver
                 await driverService.update({
                     ...selectedDriver,
                     ...driverData
                 });
                 setSuccess('Водитель успешно обновлен');
             } else {
-                // При создании отправляем CreateDriverRequest
                 await driverService.create(driverData);
                 setSuccess('Водитель успешно создан');
             }
@@ -108,7 +106,6 @@ export default function DriversPage() {
         setSuccess(null);
     };
 
-    // Функция для форматирования ФИО
     const formatFullName = (driver: Driver) => {
         return `${driver.lastName} ${driver.name} ${driver.pathronymic || ''}`.trim();
     };

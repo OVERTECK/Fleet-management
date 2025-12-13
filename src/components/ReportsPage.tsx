@@ -5,18 +5,15 @@ import {
     Box,
     Typography,
     Paper,
-    Grid,
     Card,
     CardContent,
     Button,
     Tabs,
     Tab,
-    TextField,
     Alert,
     List,
     ListItem,
     ListItemIcon,
-    ListItemText,
     ListItemSecondaryAction,
     IconButton,
     Dialog,
@@ -27,24 +24,27 @@ import {
     LinearProgress,
     Snackbar,
     CircularProgress,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
 } from '@mui/material';
 import {
     TableChart,
-    Upload,
     Download,
     Assessment,
     Timeline,
     InsertDriveFile,
     Delete,
     Visibility,
-    DateRange,
+    Summarize,
 } from '@mui/icons-material';
 import { reportService } from '@/services/reportService';
 
 interface Report {
     id: string;
     name: string;
-    type: 'trip';
+    type: 'trips' | 'common';
     date: string;
     size: string;
     status: 'completed' | 'processing' | 'error';
@@ -53,57 +53,56 @@ interface Report {
 export default function ReportsPage() {
     const [activeTab, setActiveTab] = useState(0);
     const [reports, setReports] = useState<Report[]>([
-        { id: '1', name: 'Отчет по поездкам за сентябрь', type: 'trip', date: '2024-09-30', size: '2.4 MB', status: 'completed' },
-        { id: '2', name: 'Отчет по поездкам за октябрь', type: 'trip', date: '2024-10-31', size: '2.6 MB', status: 'completed' },
+        { id: '1', name: 'Отчет по поездкам', type: 'trips', date: new Date().toISOString().split('T')[0], size: '2.4 MB', status: 'completed' },
+        { id: '2', name: 'Общий отчет', type: 'common', date: new Date().toISOString().split('T')[0], size: '2.6 MB', status: 'completed' },
     ]);
 
     const [selectedReport, setSelectedReport] = useState<Report | null>(null);
     const [reportDialogOpen, setReportDialogOpen] = useState(false);
-    const [reportDateRange, setReportDateRange] = useState({
-        start: '',
-        end: '',
-    });
+    const [reportType, setReportType] = useState<'trips' | 'common'>('trips');
     const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' });
-    const [loading, setLoading] = useState({ export: false, import: false });
+    const [loading, setLoading] = useState({ export: false });
 
     const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
         setActiveTab(newValue);
     };
 
-    const handleGenerateReport = async () => {
-        if (!reportDateRange.start || !reportDateRange.end) {
-            setSnackbar({ open: true, message: 'Пожалуйста, выберите период для отчета', severity: 'error' });
-            return;
-        }
-
-        setLoading({ ...loading, export: true });
+    const handleGenerateReport = async (type: 'trips' | 'common') => {
+        setLoading({ export: true });
 
         try {
-            // Получаем данные из бэкенда
-            const blob = await reportService.exportTripsByDate(reportDateRange.start, reportDateRange.end);
+            let blob: Blob;
 
-            // Создаем ссылку для скачивания
+            if (type === 'trips') {
+                blob = await reportService.exportTripsReport();
+            } else {
+                blob = await reportService.exportCommonReport();
+            }
+
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `отчет_поездок_${reportDateRange.start}_${reportDateRange.end}.xlsx`;
+            a.download = type === 'trips' ? 'отчет_поездок.xlsx' : 'общий_отчет.xlsx';
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
 
-            // Добавляем отчет в историю
             const newReport: Report = {
                 id: Date.now().toString(),
-                name: `Отчет по поездкам за период ${formatDate(reportDateRange.start)} - ${formatDate(reportDateRange.end)}`,
-                type: 'trip',
+                name: type === 'trips' ? 'Отчет по поездкам' : 'Общий отчет',
+                type,
                 date: new Date().toISOString().split('T')[0],
                 size: `${(blob.size / 1024 / 1024).toFixed(1)} MB`,
                 status: 'completed'
             };
 
             setReports([newReport, ...reports]);
-            setSnackbar({ open: true, message: 'Отчет успешно сгенерирован и скачан', severity: 'success' });
+            setSnackbar({
+                open: true,
+                message: type === 'trips' ? 'Отчет по поездкам успешно сгенерирован' : 'Общий отчет успешно сгенерирован',
+                severity: 'success'
+            });
 
         } catch (error: any) {
             console.error('Error generating report:', error);
@@ -113,58 +112,26 @@ export default function ReportsPage() {
                 severity: 'error'
             });
         } finally {
-            setLoading({ ...loading, export: false });
-        }
-    };
-
-    const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (!file) return;
-
-        // Проверяем расширение файла
-        if (!file.name.match(/\.(xlsx|xls)$/i)) {
-            setSnackbar({ open: true, message: 'Пожалуйста, выберите файл Excel (.xlsx или .xls)', severity: 'error' });
-            return;
-        }
-
-        setLoading({ ...loading, import: true });
-
-        try {
-            // Отправляем файл на бэкенд
-            const result = await reportService.importTrips(file);
-
-            setSnackbar({
-                open: true,
-                message: `Успешно импортировано ${result.importedCount || 'данные'} поездок`,
-                severity: 'success'
-            });
-
-        } catch (error: any) {
-            console.error('Error importing trips:', error);
-            setSnackbar({
-                open: true,
-                message: error.response?.data?.message || 'Ошибка при импорте данных',
-                severity: 'error'
-            });
-        } finally {
-            setLoading({ ...loading, import: false });
-            // Очищаем input
-            event.target.value = '';
+            setLoading({ export: false });
         }
     };
 
     const handleExport = async (report?: Report) => {
-        setLoading({ ...loading, export: true });
+        setLoading({ export: true });
 
         try {
-            // Экспорт всех поездок
-            const blob = await reportService.exportTrips();
+            let blob: Blob;
 
-            // Создаем ссылку для скачивания
+            if (report?.type === 'common' || (!report && reportType === 'common')) {
+                blob = await reportService.exportCommonReport();
+            } else {
+                blob = await reportService.exportTripsReport();
+            }
+
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = report ? `${report.name}.xlsx` : 'все_поездки.xlsx';
+            a.download = report ? `${report.name}.xlsx` : (reportType === 'trips' ? 'отчет_поездок.xlsx' : 'общий_отчет.xlsx');
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
@@ -173,14 +140,14 @@ export default function ReportsPage() {
             setSnackbar({ open: true, message: 'Экспорт успешно выполнен', severity: 'success' });
 
         } catch (error: any) {
-            console.error('Error exporting trips:', error);
+            console.error('Error exporting report:', error);
             setSnackbar({
                 open: true,
                 message: error.response?.data?.message || 'Ошибка при экспорте данных',
                 severity: 'error'
             });
         } finally {
-            setLoading({ ...loading, export: false });
+            setLoading({ export: false });
         }
     };
 
@@ -224,11 +191,19 @@ export default function ReportsPage() {
         }
     };
 
+    const getReportTypeText = (type: string) => {
+        switch (type) {
+            case 'trips': return 'Отчет по поездкам';
+            case 'common': return 'Общий отчет';
+            default: return 'Неизвестно';
+        }
+    };
+
     return (
-        <Box>
+        <Box sx={{ p: 3 }}>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                 <Typography variant="h4">
-                    📊 Отчеты по поездкам
+                    📊 Отчеты
                 </Typography>
                 <Chip
                     label={`Всего отчетов: ${reports.length}`}
@@ -238,152 +213,85 @@ export default function ReportsPage() {
             </Box>
 
             <Tabs value={activeTab} onChange={handleTabChange} sx={{ mb: 3 }}>
-                <Tab label="Создание отчета" />
+                <Tab label="Генерация отчетов" />
                 <Tab label="История отчетов" />
-                <Tab label="Импорт/Экспорт" />
+                <Tab label="Экспорт" />
             </Tabs>
 
             {activeTab === 0 && (
-                <Grid container spacing={3}>
-                    <Grid size={{ xs: 12, lg: 8 }}>
-                        <Paper sx={{ p: 3, height: '100%' }}>
-                            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <TableChart /> Создание отчета по поездкам
-                            </Typography>
+                <Paper sx={{ p: 3, mb: 3 }}>
+                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <TableChart /> Генерация отчетов
+                    </Typography>
 
-                            <Alert severity="info" sx={{ mb: 3 }}>
-                                Выберите период для генерации отчета по поездкам в формате Excel
+                    <Alert severity="info" sx={{ mb: 3 }}>
+                        Выберите тип отчета для генерации в формате Excel
+                    </Alert>
+
+                    <Box sx={{ mb: 3 }}>
+                        <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
+                            Выберите тип отчета
+                        </Typography>
+                        <FormControl fullWidth sx={{ mb: 3 }}>
+                            <InputLabel>Тип отчета</InputLabel>
+                            <Select
+                                value={reportType}
+                                label="Тип отчета"
+                                onChange={(e) => setReportType(e.target.value as 'trips' | 'common')}
+                            >
+                                <MenuItem value="trips">Отчет по поездкам</MenuItem>
+                                <MenuItem value="common">Общий отчет</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Box>
+
+                    <Box sx={{ mb: 3 }}>
+                        {reportType === 'trips' ? (
+                            <Alert severity="info" variant="outlined" sx={{ mb: 3 }}>
+                                <Typography variant="subtitle2" gutterBottom>
+                                    📋 Отчет по поездкам
+                                </Typography>
+                                <Typography variant="body2" component="div">
+                                    Будет сгенерирован Excel файл со всеми поездками. Содержит следующие колонки:
+                                    Id поездки, Пробег в км, Количество потраченного топлива,
+                                    Время начала, Время конца, Id пользователя, Id водителя, Id машины
+                                </Typography>
                             </Alert>
+                        ) : (
+                            <Alert severity="info" variant="outlined" sx={{ mb: 3 }}>
+                                <Typography variant="subtitle2" gutterBottom>
+                                    📊 Общий отчет
+                                </Typography>
+                                <Typography variant="body2" component="div">
+                                    Будет сгенерирован Excel файл с общей статистикой по поездкам.
+                                    Содержит детали поездок плюс общие показатели: общий пробег,
+                                    общее количество затраченного топлива и общее количество поездок.
+                                </Typography>
+                            </Alert>
+                        )}
+                    </Box>
 
-                            <Grid container spacing={3}>
-                                <Grid size={{ xs: 12 }}>
-                                    <Typography variant="subtitle2" gutterBottom>
-                                        <DateRange sx={{ verticalAlign: 'middle', mr: 1 }} />
-                                        Период отчета
-                                    </Typography>
-                                    <Grid container spacing={2}>
-                                        <Grid size={{ xs: 12, sm: 6 }}>
-                                            <TextField
-                                                fullWidth
-                                                type="date"
-                                                label="Начальная дата"
-                                                slotProps={{
-                                                    inputLabel: {
-                                                        shrink: true
-                                                    }
-                                                }}
-                                                value={reportDateRange.start}
-                                                onChange={(e) => setReportDateRange({ ...reportDateRange, start: e.target.value })}
-                                            />
-                                        </Grid>
-                                        <Grid size={{ xs: 12, sm: 6 }}>
-                                            <TextField
-                                                fullWidth
-                                                type="date"
-                                                label="Конечная дата"
-                                                slotProps={{
-                                                    inputLabel: {
-                                                        shrink: true
-                                                    }
-                                                }}
-                                                value={reportDateRange.end}
-                                                onChange={(e) => setReportDateRange({ ...reportDateRange, end: e.target.value })}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
-
-                                <Grid size={{ xs: 12 }}>
-                                    <Alert severity="info" variant="outlined">
-                                        <Typography variant="subtitle2" gutterBottom>
-                                            Отчет по поездкам
-                                        </Typography>
-                                        <Typography variant="body2">
-                                            Будет сгенерирован Excel файл со всеми поездками за выбранный период
-                                        </Typography>
-                                    </Alert>
-                                </Grid>
-
-                                <Grid size={{ xs: 12 }}>
-                                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2 }}>
-                                        <Button
-                                            variant="contained"
-                                            startIcon={loading.export ? <CircularProgress size={20} color="inherit" /> : <TableChart />}
-                                            onClick={handleGenerateReport}
-                                            size="large"
-                                            disabled={loading.export || !reportDateRange.start || !reportDateRange.end}
-                                        >
-                                            {loading.export ? 'Генерация...' : 'Создать отчет Excel'}
-                                        </Button>
-                                    </Box>
-                                </Grid>
-                            </Grid>
-                        </Paper>
-                    </Grid>
-
-                    <Grid size={{ xs: 12, lg: 4 }}>
-                        <Paper sx={{ p: 3, height: '100%' }}>
-                            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Timeline /> Статистика
-                            </Typography>
-
-                            <Grid container spacing={2}>
-                                <Grid size={{ xs: 12 }}>
-                                    <Card>
-                                        <CardContent>
-                                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                                <Box>
-                                                    <Typography color="textSecondary" variant="body2">
-                                                        Всего отчетов
-                                                    </Typography>
-                                                    <Typography variant="h4">
-                                                        {reports.length}
-                                                    </Typography>
-                                                </Box>
-                                                <Assessment sx={{ fontSize: 40, color: 'primary.main', opacity: 0.7 }} />
-                                            </Box>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-
-                                <Grid size={{ xs: 12 }}>
-                                    <Card>
-                                        <CardContent>
-                                            <Typography color="textSecondary" variant="body2" gutterBottom>
-                                                Последние отчеты
-                                            </Typography>
-                                            <List dense>
-                                                {reports.slice(0, 3).map((report) => (
-                                                    <ListItem key={report.id} disablePadding sx={{ py: 0.5 }}>
-                                                        <ListItemIcon sx={{ minWidth: 36, color: 'primary.main' }}>
-                                                            <InsertDriveFile />
-                                                        </ListItemIcon>
-                                                        <ListItemText
-                                                            primary={report.name}
-                                                            primaryTypographyProps={{ variant: 'body2' }}
-                                                        />
-                                                        <Chip
-                                                            label={getStatusText(report.status)}
-                                                            size="small"
-                                                            color={getStatusColor(report.status) as any}
-                                                        />
-                                                    </ListItem>
-                                                ))}
-                                            </List>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            </Grid>
-                        </Paper>
-                    </Grid>
-                </Grid>
+                    <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2 }}>
+                        <Button
+                            variant="contained"
+                            startIcon={loading.export ? <CircularProgress size={20} color="inherit" /> :
+                                (reportType === 'trips' ? <TableChart /> : <Summarize />)}
+                            onClick={() => handleGenerateReport(reportType)}
+                            size="large"
+                            disabled={loading.export}
+                        >
+                            {loading.export ? 'Генерация...' :
+                                (reportType === 'trips' ? 'Создать отчет по поездкам' : 'Создать общий отчет')}
+                        </Button>
+                    </Box>
+                </Paper>
             )}
 
             {activeTab === 1 && (
-                <Paper sx={{ p: 3 }}>
+                <Paper sx={{ p: 3, mb: 3 }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
                         <Typography variant="h6">
-                            📁 История отчетов по поездкам
+                            📁 История отчетов
                         </Typography>
                     </Box>
 
@@ -402,37 +310,39 @@ export default function ReportsPage() {
                                         py: 2
                                     }}
                                 >
-                                    <ListItemIcon sx={{ color: 'primary.main' }}>
-                                        <InsertDriveFile />
+                                    <ListItemIcon sx={{ color: report.type === 'trips' ? 'primary.main' : 'secondary.main' }}>
+                                        {report.type === 'trips' ? <TableChart /> : <Summarize />}
                                     </ListItemIcon>
-                                    <ListItemText
-                                        primary={
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                <Typography fontWeight="medium">
-                                                    {report.name}
-                                                </Typography>
-                                                <Chip
-                                                    label={getStatusText(report.status)}
-                                                    size="small"
-                                                    color={getStatusColor(report.status) as any}
-                                                    variant="outlined"
-                                                />
-                                            </Box>
-                                        }
-                                        secondary={
-                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
-                                                <Typography variant="body2" color="textSecondary">
-                                                    Создан: {formatDate(report.date)}
-                                                </Typography>
-                                                <Typography variant="body2" color="textSecondary">
-                                                    Размер: {report.size}
-                                                </Typography>
-                                                {report.status === 'processing' && (
-                                                    <LinearProgress sx={{ width: 100 }} />
-                                                )}
-                                            </Box>
-                                        }
-                                    />
+                                    <Box sx={{ flex: 1 }}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                                            <Typography variant="body1" fontWeight="medium">
+                                                {report.name}
+                                            </Typography>
+                                            <Chip
+                                                label={getReportTypeText(report.type)}
+                                                size="small"
+                                                color={report.type === 'trips' ? 'primary' : 'secondary'}
+                                                variant="outlined"
+                                            />
+                                            <Chip
+                                                label={getStatusText(report.status)}
+                                                size="small"
+                                                color={getStatusColor(report.status) as any}
+                                                variant="outlined"
+                                            />
+                                        </Box>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 0.5 }}>
+                                            <Typography variant="body2" color="textSecondary">
+                                                Создан: {formatDate(report.date)}
+                                            </Typography>
+                                            <Typography variant="body2" color="textSecondary">
+                                                Размер: {report.size}
+                                            </Typography>
+                                            {report.status === 'processing' && (
+                                                <LinearProgress sx={{ width: 100 }} />
+                                            )}
+                                        </Box>
+                                    </Box>
                                     <ListItemSecondaryAction>
                                         <Box sx={{ display: 'flex', gap: 1 }}>
                                             <IconButton
@@ -467,114 +377,119 @@ export default function ReportsPage() {
             )}
 
             {activeTab === 2 && (
-                <Grid container spacing={3}>
-                    <Grid size={{ xs: 12, md: 6 }}>
-                        <Paper sx={{ p: 3 }}>
-                            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Upload /> Импорт поездок из Excel
-                            </Typography>
+                <Paper sx={{ p: 3, mb: 3 }}>
+                    <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Download /> Экспорт отчетов
+                    </Typography>
 
-                            <Alert severity="info" sx={{ mb: 3 }}>
-                                Загрузите Excel файл с данными о поездках для импорта в систему
-                            </Alert>
+                    <Alert severity="info" sx={{ mb: 3 }}>
+                        Экспортируйте данные в Excel для дальнейшего анализа
+                    </Alert>
 
-                            <Box sx={{
-                                border: '2px dashed',
-                                borderColor: 'divider',
-                                borderRadius: 2,
-                                p: 4,
-                                textAlign: 'center',
-                                mb: 3
-                            }}>
-                                <Upload sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-                                <Typography variant="body1" gutterBottom>
-                                    Перетащите Excel файл сюда или нажмите для выбора
+                    <Box sx={{ mb: 3 }}>
+                        <Typography variant="subtitle2" gutterBottom sx={{ mb: 2 }}>
+                            Выберите тип отчета для экспорта
+                        </Typography>
+                        <FormControl fullWidth sx={{ mb: 3 }}>
+                            <InputLabel>Тип отчета</InputLabel>
+                            <Select
+                                value={reportType}
+                                label="Тип отчета"
+                                onChange={(e) => setReportType(e.target.value as 'trips' | 'common')}
+                            >
+                                <MenuItem value="trips">Отчет по поездкам</MenuItem>
+                                <MenuItem value="common">Общий отчет</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </Box>
+
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                        <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+                            <Card variant="outlined" sx={{ flex: 1 }}>
+                                <CardContent sx={{ textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                    <TableChart sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+                                    <Typography variant="h6" gutterBottom>
+                                        Отчет по поездкам
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary" gutterBottom sx={{ mb: 3, flexGrow: 1 }}>
+                                        Экспорт всех поездок с детальной информацией
+                                    </Typography>
+                                    <Button
+                                        variant="contained"
+                                        size="large"
+                                        startIcon={loading.export ? <CircularProgress size={20} color="inherit" /> : <Download />}
+                                        onClick={() => handleExport()}
+                                        disabled={loading.export}
+                                        fullWidth
+                                        sx={{ mt: 'auto' }}
+                                    >
+                                        {loading.export ? 'Экспорт...' : 'Экспортировать отчет по поездкам'}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+
+                            <Card variant="outlined" sx={{ flex: 1 }}>
+                                <CardContent sx={{ textAlign: 'center', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                    <Summarize sx={{ fontSize: 48, color: 'secondary.main', mb: 2 }} />
+                                    <Typography variant="h6" gutterBottom>
+                                        Общий отчет
+                                    </Typography>
+                                    <Typography variant="body2" color="textSecondary" gutterBottom sx={{ mb: 3, flexGrow: 1 }}>
+                                        Экспорт общей статистики по всем поездкам
+                                    </Typography>
+                                    <Button
+                                        variant="contained"
+                                        color="secondary"
+                                        size="large"
+                                        startIcon={loading.export ? <CircularProgress size={20} color="inherit" /> : <Download />}
+                                        onClick={() => {
+                                            setReportType('common');
+                                            handleExport();
+                                        }}
+                                        disabled={loading.export}
+                                        fullWidth
+                                        sx={{ mt: 'auto' }}
+                                    >
+                                        {loading.export ? 'Экспорт...' : 'Экспортировать общий отчет'}
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        </Box>
+
+                        <Card variant="outlined">
+                            <CardContent>
+                                <Typography variant="subtitle1" gutterBottom>
+                                    Формат отчетов
                                 </Typography>
-                                <Typography variant="body2" color="textSecondary" gutterBottom sx={{ mb: 3 }}>
-                                    Поддерживаемые форматы: .xlsx, .xls
-                                </Typography>
-                                <Button
-                                    variant="contained"
-                                    component="label"
-                                    startIcon={loading.import ? <CircularProgress size={20} color="inherit" /> : <Upload />}
-                                    disabled={loading.import}
-                                >
-                                    {loading.import ? 'Импорт...' : 'Выбрать Excel файл'}
-                                    <input
-                                        type="file"
-                                        hidden
-                                        accept=".xlsx,.xls"
-                                        onChange={handleImport}
-                                        disabled={loading.import}
-                                    />
-                                </Button>
-                            </Box>
-
-                            <Alert severity="warning">
-                                <Typography variant="body2">
-                                    Файл должен содержать следующие колонки: Id поездки, Пробег (км), Расход топлива (л),
-                                    Время начала, Время окончания, Id пользователя, Id водителя, Id машины
-                                </Typography>
-                            </Alert>
-                        </Paper>
-                    </Grid>
-
-                    <Grid size={{ xs: 12, md: 6 }}>
-                        <Paper sx={{ p: 3 }}>
-                            <Typography variant="h6" gutterBottom sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Download /> Экспорт поездок в Excel
-                            </Typography>
-
-                            <Alert severity="info" sx={{ mb: 3 }}>
-                                Экспортируйте данные о поездках в Excel для дальнейшего анализа
-                            </Alert>
-
-                            <Grid container spacing={2}>
-                                <Grid size={{ xs: 12 }}>
-                                    <Card variant="outlined">
-                                        <CardContent sx={{ textAlign: 'center' }}>
-                                            <TableChart sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
-                                            <Typography variant="h6" gutterBottom>
-                                                Экспорт всех поездок
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary" gutterBottom sx={{ mb: 3 }}>
-                                                Будет создан Excel файл со всеми поездками из системы
-                                            </Typography>
-                                            <Button
-                                                variant="contained"
-                                                size="large"
-                                                startIcon={loading.export ? <CircularProgress size={20} color="inherit" /> : <Download />}
-                                                onClick={() => handleExport()}
-                                                disabled={loading.export}
-                                                fullWidth
-                                            >
-                                                {loading.export ? 'Экспорт...' : 'Экспортировать в Excel'}
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-
-                                <Grid size={{ xs: 12 }}>
-                                    <Card variant="outlined">
-                                        <CardContent>
-                                            <Typography variant="subtitle1" gutterBottom>
-                                                Инструкция по формату файла
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary">
-                                                <Box component="ul" sx={{ pl: 2, mb: 0 }}>
-                                                    <li>Формат: Excel (.xlsx)</li>
-                                                    <li>Первая строка должна содержать заголовки колонок</li>
-                                                    <li>Обязательные колонки: Id поездки, Пробег, Расход топлива</li>
-                                                    <li>Даты должны быть в формате ГГГГ-ММ-ДД ЧЧ:ММ:СС</li>
-                                                </Box>
-                                            </Typography>
-                                        </CardContent>
-                                    </Card>
-                                </Grid>
-                            </Grid>
-                        </Paper>
-                    </Grid>
-                </Grid>
+                                <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' }, gap: 3 }}>
+                                    <Box sx={{ flex: 1 }}>
+                                        <Typography variant="body2" color="textSecondary" component="div">
+                                            <strong>Отчет по поездкам:</strong>
+                                            <Box component="ul" sx={{ pl: 2, mb: 0 }}>
+                                                <li>Id поездки</li>
+                                                <li>Пробег в км</li>
+                                                <li>Количество потраченного топлива (литры)</li>
+                                                <li>Время начала и окончания</li>
+                                                <li>Id пользователя, водителя, машины</li>
+                                            </Box>
+                                        </Typography>
+                                    </Box>
+                                    <Box sx={{ flex: 1 }}>
+                                        <Typography variant="body2" color="textSecondary" component="div">
+                                            <strong>Общий отчет:</strong>
+                                            <Box component="ul" sx={{ pl: 2, mb: 0 }}>
+                                                <li>Все данные из отчета по поездкам</li>
+                                                <li>Общее количество пробега</li>
+                                                <li>Общее количество затраченного топлива</li>
+                                                <li>Общее количество поездок</li>
+                                            </Box>
+                                        </Typography>
+                                    </Box>
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    </Box>
+                </Paper>
             )}
 
             {/* Диалог просмотра отчета */}
@@ -589,59 +504,67 @@ export default function ReportsPage() {
                 </DialogTitle>
                 <DialogContent>
                     {selectedReport && (
-                        <Grid container spacing={3}>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                    Тип отчета
-                                </Typography>
-                                <Typography variant="body1">
-                                    Отчет по поездкам
-                                </Typography>
-                            </Grid>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                    Дата создания
-                                </Typography>
-                                <Typography variant="body1">
-                                    {formatDate(selectedReport.date)}
-                                </Typography>
-                            </Grid>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                    Размер файла
-                                </Typography>
-                                <Typography variant="body1">
-                                    {selectedReport.size}
-                                </Typography>
-                            </Grid>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                                <Typography variant="subtitle2" color="textSecondary">
-                                    Статус
-                                </Typography>
-                                <Chip
-                                    label={getStatusText(selectedReport.status)}
-                                    color={getStatusColor(selectedReport.status) as any}
-                                />
-                            </Grid>
-                            <Grid size={{ xs: 12 }}>
-                                <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
-                                    <TableChart sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
-                                    <Typography variant="body1" gutterBottom>
-                                        Excel отчет по поездкам
+                        <Box sx={{ mt: 2 }}>
+                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3, mb: 3 }}>
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="subtitle2" color="textSecondary">
+                                        Тип отчета
                                     </Typography>
-                                    <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
-                                        Содержит данные о поездках за выбранный период
+                                    <Typography variant="body1">
+                                        {getReportTypeText(selectedReport.type)}
                                     </Typography>
-                                    <Button
-                                        variant="contained"
-                                        startIcon={<Download />}
-                                        onClick={() => selectedReport && handleExport(selectedReport)}
-                                    >
-                                        Скачать Excel файл
-                                    </Button>
-                                </Paper>
-                            </Grid>
-                        </Grid>
+                                </Box>
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="subtitle2" color="textSecondary">
+                                        Дата создания
+                                    </Typography>
+                                    <Typography variant="body1">
+                                        {formatDate(selectedReport.date)}
+                                    </Typography>
+                                </Box>
+                            </Box>
+                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 3, mb: 3 }}>
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="subtitle2" color="textSecondary">
+                                        Размер файла
+                                    </Typography>
+                                    <Typography variant="body1">
+                                        {selectedReport.size}
+                                    </Typography>
+                                </Box>
+                                <Box sx={{ flex: 1 }}>
+                                    <Typography variant="subtitle2" color="textSecondary">
+                                        Статус
+                                    </Typography>
+                                    <Chip
+                                        label={getStatusText(selectedReport.status)}
+                                        color={getStatusColor(selectedReport.status) as any}
+                                    />
+                                </Box>
+                            </Box>
+                            <Paper variant="outlined" sx={{ p: 3, textAlign: 'center' }}>
+                                {selectedReport.type === 'trips' ?
+                                    <TableChart sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} /> :
+                                    <Summarize sx={{ fontSize: 60, color: 'secondary.main', mb: 2 }} />
+                                }
+                                <Typography variant="body1" gutterBottom>
+                                    {selectedReport.type === 'trips' ? 'Отчет по поездкам' : 'Общий отчет'}
+                                </Typography>
+                                <Typography variant="body2" color="textSecondary" sx={{ mb: 3 }}>
+                                    {selectedReport.type === 'trips'
+                                        ? 'Содержит детальную информацию о всех поездках'
+                                        : 'Содержит общую статистику по всем поездкам'}
+                                </Typography>
+                                <Button
+                                    variant="contained"
+                                    color={selectedReport.type === 'trips' ? 'primary' : 'secondary'}
+                                    startIcon={<Download />}
+                                    onClick={() => handleExport(selectedReport)}
+                                >
+                                    Скачать Excel файл
+                                </Button>
+                            </Paper>
+                        </Box>
                     )}
                 </DialogContent>
                 <DialogActions>

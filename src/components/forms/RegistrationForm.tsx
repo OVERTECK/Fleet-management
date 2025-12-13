@@ -29,12 +29,10 @@ export default function RegistrationForm({ onSuccess, onError }: RegistrationFor
 
             console.log('Registration successful, user:', user);
 
-            // Обновляем контекст
             login(user);
 
             onSuccess('Регистрация выполнена успешно!');
 
-            // Немедленный редирект
             router.push('/dashboard');
 
         } catch (error: any) {

@@ -47,7 +47,7 @@ export default function RefuelingPage() {
             console.error('Error loading refuelings:', error);
             const errorMessage = error.response?.data?.message || error.message || 'Ошибка загрузки заправок';
             setError(`Ошибка загрузки заправок: ${errorMessage}`);
-            setRefuelings([]); // Устанавливаем пустой массив в случае ошибки
+            setRefuelings([]);
         } finally {
             setLoading(false);
         }
@@ -105,7 +105,6 @@ export default function RefuelingPage() {
         setSuccess(null);
     };
 
-    // Расчет стоимости за литр
     const calculatePricePerLiter = (refueling: Refueling) => {
         if (refueling.refilledLiters === 0) return 0;
         return (refueling.price / refueling.refilledLiters).toFixed(2);

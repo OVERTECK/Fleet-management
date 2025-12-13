@@ -83,7 +83,7 @@ export default function AssignmentsPage() {
             } else {
                 await assignmentService.create({
                     ...assignmentData,
-                    id: undefined // ID сгенерируется на бэкенде
+                    id: undefined
                 });
             }
             handleClose();
@@ -94,7 +94,6 @@ export default function AssignmentsPage() {
         }
     };
 
-    // Проверка активного назначения
     const isActiveAssignment = (assignment: Assignment) => {
         const now = new Date();
         const start = new Date(assignment.start);

@@ -22,7 +22,7 @@ import {
     Dashboard,
     ExitToApp,
     Analytics,
-    Assessment, // Добавили иконку отчетов
+    Assessment,
 } from '@mui/icons-material';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -31,30 +31,26 @@ import ClientOnly from '@/components/ClientOnly';
 
 const drawerWidth = 240;
 
-// Маппинг ID ролей на названия для отображения
 const ROLE_NAMES: Record<number, string> = {
     1: 'Водитель',
     2: 'Диспетчер',
     3: 'Администратор'
 };
 
-// Базовые пункты меню для всех ролей
 const baseMenuItems = [
     { text: 'Дашборд', icon: <Dashboard />, path: '/dashboard', roles: [1, 2, 3] },
     { text: 'Поездки', icon: <Route />, path: '/trips', roles: [1, 2, 3] },
 ];
 
-// Пункты меню для диспетчеров и администраторов
 const managementMenuItems = [
     { text: 'Автомобили', icon: <DirectionsCar />, path: '/cars', roles: [2, 3] },
     { text: 'Водители', icon: <People />, path: '/drivers', roles: [2, 3] },
     { text: 'Назначения', icon: <Assignment />, path: '/assignments', roles: [2, 3] },
     { text: 'Техобслуживание', icon: <Build />, path: '/maintenance', roles: [2, 3] },
     { text: 'Заправки', icon: <LocalGasStation />, path: '/refueling', roles: [2, 3] },
-    { text: 'Отчеты', icon: <Assessment />, path: '/reports', roles: [2, 3] }, // Добавили отчеты
+    { text: 'Отчеты', icon: <Assessment />, path: '/reports', roles: [2, 3] },
 ];
 
-// Пункты меню только для администраторов
 const adminMenuItems = [
     { text: 'Аналитика', icon: <Analytics />, path: '/analytics', roles: [3] },
 ];
@@ -72,7 +68,6 @@ export default function AuthenticatedLayout({
         logout();
     };
 
-    // Получаем название роли для отображения
     const getUserRoleName = () => {
         if (!user || !user.roleId) return 'Пользователь';
         return ROLE_NAMES[user.roleId] || 'Пользователь';
@@ -81,7 +76,6 @@ export default function AuthenticatedLayout({
     const userRoleName = getUserRoleName();
     const userRoleId = user?.roleId || 0;
 
-    // Фильтруем пункты меню по roleId пользователя
     const getMenuItems = () => {
         const allMenuItems = [...baseMenuItems, ...managementMenuItems, ...adminMenuItems];
         return allMenuItems.filter(item => item.roles.includes(userRoleId));

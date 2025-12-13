@@ -69,7 +69,6 @@ export default function DashboardPage() {
         try {
             setLoading(true);
 
-            // Загружаем данные параллельно с улучшенной обработкой ошибок
             const [cars, drivers, trips, maintenance, refuelings] = await Promise.all([
                 carService.getAll().catch(error => {
                     console.error('Error loading cars:', error);
@@ -93,19 +92,16 @@ export default function DashboardPage() {
                 })
             ]);
 
-            // Расчет статистики
             const totalCost = maintenance.reduce((sum, m) => sum + m.price, 0) +
                 refuelings.reduce((sum, r) => sum + r.price, 0);
 
             const activeCars = cars.filter(car => car.status === 'active').length;
             const maintenanceCars = cars.filter(car => car.status === 'maintenance').length;
 
-            // Расчет среднего расхода топлива
             const totalFuel = trips.reduce((sum, trip) => sum + trip.consumptionLitersFuel, 0);
             const totalDistance = trips.reduce((sum, trip) => sum + trip.traveledKM, 0);
             const avgFuelConsumption = totalDistance > 0 ? (totalFuel / totalDistance) * 100 : 0;
 
-            // Поиск аномалий расхода
             const anomalies = detectFuelAnomalies(trips);
 
             setStats({
@@ -133,7 +129,6 @@ export default function DashboardPage() {
     const detectFuelAnomalies = (trips: Trip[]): any[] => {
         if (trips.length === 0) return [];
 
-        // Группируем поездки по автомобилям
         const tripsByCar = trips.reduce((acc, trip) => {
             if (!acc[trip.carId]) acc[trip.carId] = [];
             acc[trip.carId].push(trip);
@@ -145,12 +140,10 @@ export default function DashboardPage() {
         Object.entries(tripsByCar).forEach(([carId, carTrips]) => {
             if (carTrips.length < 3) return;
 
-            // Рассчитываем средний расход для автомобиля
             const totalFuel = carTrips.reduce((sum, trip) => sum + trip.consumptionLitersFuel, 0);
             const totalDistance = carTrips.reduce((sum, trip) => sum + trip.traveledKM, 0);
             const avgConsumption = totalDistance > 0 ? (totalFuel / totalDistance) * 100 : 0;
 
-            // Проверяем последние 3 поездки на аномалии
             const recentTrips = carTrips.slice(-3);
             recentTrips.forEach(trip => {
                 if (trip.traveledKM > 0) {

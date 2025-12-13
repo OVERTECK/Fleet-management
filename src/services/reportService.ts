@@ -1,37 +1,27 @@
 import axios from 'axios';
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 export const reportService = {
-    exportTrips: async () => {
-        const response = await axios.get('/api/reports/trips', {
+    exportTripsReport: async (): Promise<Blob> => {
+        const response = await axios.get(`api/reports/trips`, {
             responseType: 'blob',
             headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             }
         });
         return response.data;
     },
 
-    exportTripsByDate: async (startDate: string, endDate: string) => {
-        const response = await axios.get('/api/reports/trips', {
-            params: { startDate, endDate },
+    exportCommonReport: async (): Promise<Blob> => {
+        const response = await axios.get(`api/reports/common`, {
             responseType: 'blob',
             headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
                 'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             }
         });
         return response.data;
     },
-
-    importTrips: async (file: File) => {
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const response = await axios.post('/api/import/trips', formData, {
-            headers: {
-                'X-CSRF-TOKEN': localStorage.getItem('csrfToken'),
-                'Content-Type': 'multipart/form-data'
-            }
-        });
-        return response.data;
-    }
 };

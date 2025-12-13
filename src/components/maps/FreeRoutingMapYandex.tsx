@@ -31,7 +31,6 @@ export default function FreeRoutingMapYandex({
 }: FreeRoutingMapYandexProps) {
     const [routeCoords, setRouteCoords] = useState<number[][]>([]);
 
-    // Бесплатный роутинг через публичный API Яндекса (без ключа!)
     const buildRoute = async (points: RoutePoint[]) => {
         if (points.length < 2) {
             setRouteCoords([]);
@@ -133,7 +132,6 @@ export default function FreeRoutingMapYandex({
                             }}
                             instanceRef={(ref: any) => {
                                 if (ref) {
-                                    // Подмена функции удаления (глобально, но безопасно в рамках компонента)
                                     (window as any).removePoint = removePoint;
                                 }
                             }}

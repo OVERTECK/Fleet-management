@@ -32,26 +32,23 @@ export default function CarForm({ car, onSubmit, onCancel }: CarFormProps) {
         formState: { errors, isSubmitting }
     } = useForm();
 
-    // Получаем текущее значение статуса для отображения
     const currentStatus = watch('status');
 
     useEffect(() => {
         if (car) {
-            // При редактировании - устанавливаем все значения из car
             reset({
                 vin: car.vin || '',
                 model: car.model || '',
                 number: car.number || '',
-                status: car.status || '', // Пустая строка если статуса нет
+                status: car.status || '',
                 totalKM: car.totalKM || 0
             });
         } else {
-            // При создании новой машины - пустые значения
             reset({
                 vin: '',
                 model: '',
                 number: '',
-                status: '', // Пустая строка по умолчанию
+                status: '',
                 totalKM: 0
             });
         }
@@ -102,7 +99,7 @@ export default function CarForm({ car, onSubmit, onCancel }: CarFormProps) {
                         select
                         label="Статус"
                         variant="outlined"
-                        value={currentStatus || ''} // Управляемое значение
+                        value={currentStatus || ''}
                         {...register('status', { required: 'Статус обязателен' })}
                         error={!!errors.status}
                         helperText={errors.status?.message as string}

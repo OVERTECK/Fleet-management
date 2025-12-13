@@ -31,7 +31,6 @@ export default function AnalyticsContent() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Заглушка для демонстрации
         setTimeout(() => {
             setCostRankings([
                 {
