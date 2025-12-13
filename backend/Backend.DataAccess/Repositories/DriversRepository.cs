@@ -1,9 +1,10 @@
 using Backend.DataAccess.Entities;
+using Backend.DataAccess.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.DataAccess.Repositories;
 
-public sealed class DriversRepository(MyDbContext dbContext)
+public sealed class DriversRepository(MyDbContext dbContext) : IDriverRepository
 {
 
     public async Task<List<DriverEntity>> GetAll()
@@ -11,7 +12,7 @@ public sealed class DriversRepository(MyDbContext dbContext)
         return await dbContext.Drivers.AsNoTracking().ToListAsync();
     }
 
-    public async Task<DriverEntity?> GetById(Guid id)
+    public async Task<DriverEntity> GetById(Guid id)
     {
         var searchedDriver = await dbContext.Drivers.AsNoTracking().FirstOrDefaultAsync(c => c.Id == id);
 

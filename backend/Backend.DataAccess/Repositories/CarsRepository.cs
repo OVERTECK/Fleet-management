@@ -1,9 +1,10 @@
 using Backend.DataAccess.Entities;
+using Backend.DataAccess.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.DataAccess.Repositories;
 
-public sealed class CarsRepository(MyDbContext dbContext)
+public sealed class CarsRepository(MyDbContext dbContext) : ICarsRepository
 {
     public async Task<List<CarEntity>> GetAll()
     {
@@ -29,7 +30,7 @@ public sealed class CarsRepository(MyDbContext dbContext)
         await dbContext.SaveChangesAsync();
     }
 
-    public async Task Update(CarEntity car)
+    public async Task<CarEntity> Update(CarEntity car)
     {
         var searchedCar = await dbContext.Cars.FirstOrDefaultAsync(c => c.VIN == car.VIN);
 
@@ -47,6 +48,8 @@ public sealed class CarsRepository(MyDbContext dbContext)
                 .SetProperty(c => c.TotalKM, car.TotalKM));
 
         await dbContext.SaveChangesAsync();
+
+        return car;
     }
 
     public async Task Delete(string vin)

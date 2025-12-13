@@ -1,5 +1,6 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
+using Backend.API.Services.Abstraction;
 using Backend.DataAccess.DTO.Requests;
 using Backend.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -10,14 +11,16 @@ public class Create : IEndpoint
 {
     public void MapEndpoint(IEndpointRouteBuilder app)
     {
-        app.MapPost("/trips", async (CreateTripRequest request, TripsCreateHandler handler) =>
+        app.MapPost("/trips", async (
+            CreateTripRequest request,
+            TripsCreateHandler handler) =>
         {
             return await handler.Handle(request);
         }).WithTags(nameof(TripEntity));
     }
 }
 
-sealed class TripsCreateHandler(ILogger<TripsCreateHandler> logger, TripsService service)
+public sealed class TripsCreateHandler(ILogger<TripsCreateHandler> logger, ITripsService service)
 {
     public async Task<IResult> Handle(CreateTripRequest request)
     {

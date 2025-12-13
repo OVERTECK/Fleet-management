@@ -13,6 +13,7 @@ using Backend.API.Features.Routes;
 using Backend.API.Features.Targets;
 using Backend.API.Features.Trips;
 using Backend.API.Services;
+using Backend.API.Services.Abstraction;
 using Backend.DataAccess;
 using Backend.DataAccess.Repositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -139,7 +140,7 @@ public static class Di
         services.AddScoped<MaintenanceRecordsService>();
         services.AddScoped<RoutesService>();
         services.AddScoped<TargetsService>();
-        services.AddScoped<TripsService>();
+        services.AddScoped<ITripsService>();
         services.AddScoped<AnalyticsService>();
         services.AddScoped<UsersService>();
         services.AddScoped<JwtService>();

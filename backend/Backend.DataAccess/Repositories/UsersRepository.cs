@@ -27,6 +27,13 @@ public class UsersRepository(MyDbContext dbContext)
 
     public async Task Create(UserEntity user)
     {
+        var searchedUser = await dbContext.Users.FirstOrDefaultAsync(c => c.Id == user.Id || c.Login == user.Login);
+
+        if (searchedUser != null)
+        {
+            throw new InvalidOperationException();
+        }
+
         dbContext.Users.Add(user);
 
         await dbContext.SaveChangesAsync();

@@ -5,6 +5,18 @@ namespace Backend.DataAccess;
 
 public class MyDbContext(DbContextOptions<MyDbContext> options) : DbContext(options)
 {
+    public MyDbContext()
+        : this(GetOptions())
+    {
+    }
+
+    private static DbContextOptions<MyDbContext> GetOptions()
+    {
+        return new DbContextOptionsBuilder<MyDbContext>()
+            .UseNpgsql("Username=admin;Password=admin;Host=localhost;Port=5432;Database=car_park_db;")
+            .Options;
+    }
+
     public DbSet<CarEntity> Cars { get; set; }
 
     public DbSet<DriverEntity> Drivers { get; set; }
@@ -19,7 +31,7 @@ public class MyDbContext(DbContextOptions<MyDbContext> options) : DbContext(opti
 
     public DbSet<TripEntity> Trips { get; set; }
 
-    public DbSet<UserEntity> Users { get; set; }
+    public virtual DbSet<UserEntity> Users { get; set; }
 
     public DbSet<RoleEntity> Roles { get; set; }
 
@@ -28,7 +40,6 @@ public class MyDbContext(DbContextOptions<MyDbContext> options) : DbContext(opti
         modelBuilder.Entity<RoleEntity>().HasData(
             new RoleEntity { Id = 1, Title = "Водитель" },
             new RoleEntity { Id = 2, Title = "Диспетчер" },
-            new RoleEntity { Id = 3, Title = "Администратор" }
-        );
+            new RoleEntity { Id = 3, Title = "Администратор" });
     }
 }

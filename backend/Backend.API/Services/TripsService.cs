@@ -1,15 +1,16 @@
 using System.Security.Claims;
+using Backend.API.Services.Abstraction;
 using Backend.DataAccess.DTO.Requests;
 using Backend.DataAccess.Entities;
-using Backend.DataAccess.Repositories;
+using Backend.DataAccess.Repositories.Abstractions;
 
 namespace Backend.API.Services;
 
 public class TripsService(
     ILogger<TripsService> logger,
-    TripsRepository tripsRepository,
-    CarsRepository carsRepository,
-    TripsCacheService tripsCacheService)
+    ITripsRepository tripsRepository,
+    ICarsRepository carsRepository,
+    ITripsCacheService tripsCacheService) : ITripsService
 {
     public async Task<List<TripEntity>> GetAll(IHttpContextAccessor contextAccessor)
     {
@@ -52,24 +53,12 @@ public class TripsService(
         return await tripsRepository.GetById(id);
     }
 
-    public async Task Create(CreateTripRequest request)
+    public async Task<TripEntity> Create(CreateTripRequest request)
     {
         logger.LogInformation($"{nameof(TripEntity)}: Create trip");
 
-        var searchedCar = await carsRepository.IsExists(request.CarId);
-
-        if (!searchedCar)
-        {
-            throw new NullReferenceException($"Unable to find car with id {request.CarId}");
-        }
-
         var oldCar = await carsRepository.GetByVIN(request.CarId);
-
-        if (oldCar == null)
-        {
-            throw new NullReferenceException($"Unable to find car with id {request.CarId}");
-        }
-
+        
         var updatedCar = new CarEntity
         {
             VIN = oldCar.VIN,
@@ -88,8 +77,6 @@ public class TripsService(
             Id = Guid.NewGuid(),
             Latitude = c.Latitude,
             Longitude = c.Longitude,
-            // Address = c.Address,
-            // TimeStamp = c.TimeStamp,
             TripId = tripId,
         }).ToList();
 
@@ -106,19 +93,14 @@ public class TripsService(
             Route = routes,
         };
 
-        await tripsRepository.Create(trip);
+        var createdTrip = await tripsRepository.Create(trip);
+
+        return createdTrip;
     }
 
-    public async Task Update(UpdateTripRequest request)
+    public async Task<bool> Update(UpdateTripRequest request)
     {
         logger.LogInformation($"{nameof(TripEntity)}: Update trip");
-
-        var searchedCar = await carsRepository.IsExists(request.CarId);
-
-        if (!searchedCar)
-        {
-            throw new NullReferenceException($"Unable to find car with id {request.CarId}");
-        }
 
         var oldCar = await carsRepository.GetByVIN(request.CarId);
 
@@ -162,6 +144,8 @@ public class TripsService(
         };
 
         await tripsRepository.Update(trip);
+
+        return true;
     }
 
     public async Task Delete(Guid id)

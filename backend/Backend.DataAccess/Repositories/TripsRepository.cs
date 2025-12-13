@@ -1,12 +1,12 @@
 using System.Text.Json;
 using Backend.DataAccess.Entities;
+using Backend.DataAccess.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
 namespace Backend.DataAccess.Repositories;
 
-public class TripsRepository(
-    MyDbContext dbContext)
+public class TripsRepository(MyDbContext dbContext) : ITripsRepository
 {
     public async Task<List<TripEntity>> GetAll()
     {
@@ -38,18 +38,39 @@ public class TripsRepository(
         await this.EnsureExists(id);
 
         return await dbContext.Trips
+            .Include(c => c.Car)
             .AsNoTracking()
             .FirstOrDefaultAsync(c => c.Id == id);
     }
 
-    public async Task Create(TripEntity trip)
+    public async Task<TripEntity> Create(TripEntity trip)
     {
+        var searchedDriver = await dbContext.Drivers.FirstOrDefaultAsync(c => c.Id == trip.DriverId);
+
+        if (searchedDriver == null)
+        {
+            throw new NullReferenceException($"Driver {trip.DriverId} does not exist");
+        }
+
+        var searchedCar = await dbContext.Cars.FirstOrDefaultAsync(c => c.VIN == trip.CarId);
+
+        if (searchedCar == null)
+        {
+            throw new NullReferenceException($"Unable to find car with id {trip.CarId}");
+        }
+
         await dbContext.Trips.AddAsync(trip);
 
         await dbContext.SaveChangesAsync();
+
+        var createdTrip = await dbContext.Trips
+            .Include(c => c.Car)
+            .FirstAsync(c => c.Id == trip.Id);
+
+        return createdTrip;
     }
 
-    public async Task Update(TripEntity trip)
+    public async Task<TripEntity?> Update(TripEntity trip)
     {
         await using var transaction = await dbContext.Database.BeginTransactionAsync();
 
@@ -80,10 +101,14 @@ public class TripsRepository(
                     .SetProperty(c => c.ConsumptionLitersFuel, trip.ConsumptionLitersFuel));
 
             await transaction.CommitAsync();
+
+            return searchedTrip;
         }
         catch (Exception)
         {
             await transaction.RollbackAsync();
+
+            return null;
         }
     }
 
