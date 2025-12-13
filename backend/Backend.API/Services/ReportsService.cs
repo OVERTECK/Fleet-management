@@ -4,11 +4,6 @@ namespace Backend.API.Services;
 
 public class ReportsService(TripsService tripsService)
 {
-    /// <summary>
-    /// Метод создает и экспортирует поездки в зависимости от роли.
-    /// </summary>
-    /// <param name="httpContextAccessor"></param>
-    /// <returns></returns>
     public async Task<IResult> CreateTripsReport(IHttpContextAccessor httpContextAccessor)
     {
         using (var workbook = new XLWorkbook())

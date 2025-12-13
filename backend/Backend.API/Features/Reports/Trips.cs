@@ -26,9 +26,15 @@ sealed class TripsReportHandler(
     {
         try
         {
-            var file = await reportsService.CreateReport(httpContextAccessor);
+            var file = await reportsService.CreateTripsReport(httpContextAccessor);
 
             return file;
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            logger.LogError(ex, ex.Message);
+
+            return Results.Unauthorized();
         }
         catch (Exception ex)
         {
