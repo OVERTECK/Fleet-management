@@ -1,5 +1,6 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
+using Backend.API.Services.Abstraction;
 using Backend.DataAccess.Entities;
 
 namespace Backend.API.Features.Trips;
@@ -15,7 +16,7 @@ public class GetById : IEndpoint
     }
 }
 
-sealed class TripsGetByIdHandler(ILogger<TripsGetByIdHandler> logger, TripsService service)
+sealed class TripsGetByIdHandler(ILogger<TripsGetByIdHandler> logger, ITripsService service)
 {
     public async Task<IResult> Handle(Guid id)
     {

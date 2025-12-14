@@ -1,5 +1,6 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
+using Backend.API.Services.Abstraction;
 using Backend.DataAccess.Entities;
 
 namespace Backend.API.Features.Trips;
@@ -15,7 +16,7 @@ public class Delete : IEndpoint
     }
 }
 
-sealed class TripsDeleteHandler(ILogger<TripsDeleteHandler> logger, TripsService service)
+sealed class TripsDeleteHandler(ILogger<TripsDeleteHandler> logger, ITripsService service)
 {
     public async Task<IResult> Handle(Guid id)
     {

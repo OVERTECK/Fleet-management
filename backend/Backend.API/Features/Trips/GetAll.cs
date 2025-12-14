@@ -1,5 +1,6 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
+using Backend.API.Services.Abstraction;
 using Backend.DataAccess.Entities;
 using Microsoft.AspNetCore.Authorization;
 
@@ -20,7 +21,7 @@ public class GetAll : IEndpoint
 
 sealed class TripsGetAllHandler(
     ILogger<TripsGetAllHandler> logger,
-    TripsService service,
+    ITripsService service,
     IHttpContextAccessor httpContextAccessor)
 {
     public async Task<IResult> Handle()

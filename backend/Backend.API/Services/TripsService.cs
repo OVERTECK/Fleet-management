@@ -58,7 +58,7 @@ public class TripsService(
         logger.LogInformation($"{nameof(TripEntity)}: Create trip");
 
         var oldCar = await carsRepository.GetByVIN(request.CarId);
-        
+
         var updatedCar = new CarEntity
         {
             VIN = oldCar.VIN,

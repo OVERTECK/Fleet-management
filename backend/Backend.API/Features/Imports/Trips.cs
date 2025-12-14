@@ -1,6 +1,7 @@
 using Backend.API.EndpointsSettings;
 using Backend.DataAccess.Entities;
 using Backend.DataAccess.Repositories;
+using Backend.DataAccess.Repositories.Abstractions;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ public class TripsImportsEndpoint : IEndpoint
     }
 }
 
-sealed class TripsImportHandler(ILogger<TripsImportHandler> logger, TripsRepository tripsRepository)
+sealed class TripsImportHandler(ILogger<TripsImportHandler> logger, ITripsRepository tripsRepository)
 {
     public async Task<IResult> Handle(IFormFile file, HttpContext httpContext)
     {

@@ -1,8 +1,9 @@
+using Backend.API.Services.Abstraction;
 using ClosedXML.Excel;
 
 namespace Backend.API.Services;
 
-public class ReportsService(TripsService tripsService)
+public class ReportsService(ITripsService tripsService)
 {
     public async Task<IResult> CreateTripsReport(IHttpContextAccessor httpContextAccessor)
     {

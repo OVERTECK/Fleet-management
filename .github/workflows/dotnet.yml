@@ -1,0 +1,11 @@
+name: Project
+
+on:
+  push:
+    branches: [master, backend-dev, test-fronted]
+
+jobs:
+  tests:
+    runs-on: ununtu-latest
+  build:
+

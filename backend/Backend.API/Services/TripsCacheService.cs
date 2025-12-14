@@ -2,6 +2,7 @@ using System.Text.Json;
 using Backend.API.Services.Abstraction;
 using Backend.DataAccess.Entities;
 using Backend.DataAccess.Repositories;
+using Backend.DataAccess.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 
@@ -9,7 +10,7 @@ namespace Backend.API.Services;
 
 public class TripsCacheService(
     IDistributedCache cache,
-    TripsRepository tripsRepository) : ITripsCacheService
+    ITripsRepository tripsRepository) : ITripsCacheService
 {
     public async Task<List<TripEntity>> GetAll()
     {

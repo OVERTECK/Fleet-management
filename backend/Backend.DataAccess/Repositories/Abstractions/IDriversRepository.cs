@@ -2,7 +2,7 @@ using Backend.DataAccess.Entities;
 
 namespace Backend.DataAccess.Repositories.Abstractions;
 
-public interface IDriverRepository
+public interface IDriversRepository
 {
     Task<List<DriverEntity>> GetAll();
 

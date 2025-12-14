@@ -13,7 +13,7 @@ public class TripsUpdateServiceTests
     private readonly Mock<ILogger<TripsService>> _loggerMock;
     private readonly Mock<ITripsRepository> _tripsRepositoryMock;
     private readonly Mock<ICarsRepository> _carsRepositoryMock;
-    private readonly Mock<IDriverRepository> _driverRepositoryMock;
+    private readonly Mock<IDriversRepository> _driverRepositoryMock;
     private readonly Mock<ITripsCacheService> _tripsCacheServiceMock;
     
     private readonly TripsService _tripsService;
@@ -23,7 +23,7 @@ public class TripsUpdateServiceTests
         _loggerMock = new Mock<ILogger<TripsService>>();
         _tripsRepositoryMock = new Mock<ITripsRepository>();
         _carsRepositoryMock = new Mock<ICarsRepository>();
-        _driverRepositoryMock = new Mock<IDriverRepository>();
+        _driverRepositoryMock = new Mock<IDriversRepository>();
         _tripsCacheServiceMock = new Mock<ITripsCacheService>();
         
         _tripsService = new TripsService(

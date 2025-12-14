@@ -16,6 +16,7 @@ using Backend.API.Services;
 using Backend.API.Services.Abstraction;
 using Backend.DataAccess;
 using Backend.DataAccess.Repositories;
+using Backend.DataAccess.Repositories.Abstractions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -140,7 +141,7 @@ public static class Di
         services.AddScoped<MaintenanceRecordsService>();
         services.AddScoped<RoutesService>();
         services.AddScoped<TargetsService>();
-        services.AddScoped<ITripsService>();
+        services.AddScoped<ITripsService, TripsService>();
         services.AddScoped<AnalyticsService>();
         services.AddScoped<UsersService>();
         services.AddScoped<JwtService>();
@@ -152,13 +153,13 @@ public static class Di
 
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
-        services.AddScoped<CarsRepository>();
-        services.AddScoped<DriversRepository>();
+        services.AddScoped<ICarsRepository, CarsRepository>();
+        services.AddScoped<IDriversRepository, DriversRepository>();
+        services.AddScoped<ITripsRepository, TripsRepository>();
         services.AddScoped<GasStationsRepository>();
         services.AddScoped<MaintenanceRecordsRepository>();
         services.AddScoped<RouteRepository>();
         services.AddScoped<TargetsRepository>();
-        services.AddScoped<TripsRepository>();
         services.AddScoped<AnalyticsRepository>();
         services.AddScoped<UsersRepository>();
 
@@ -193,7 +194,7 @@ public static class Di
 
     private static IServiceCollection AddCacheServices(this IServiceCollection services)
     {
-        services.AddScoped<TripsCacheService>();
+        services.AddScoped<ITripsCacheService, TripsCacheService>();
 
         return services;
     }

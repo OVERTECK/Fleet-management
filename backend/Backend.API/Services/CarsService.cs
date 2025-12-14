@@ -1,12 +1,13 @@
 using Backend.DataAccess.DTO.Requests;
 using Backend.DataAccess.Entities;
 using Backend.DataAccess.Repositories;
+using Backend.DataAccess.Repositories.Abstractions;
 
 namespace Backend.API.Services;
 
 public class CarsService(
     ILogger<CarsService> logger,
-    CarsRepository carRepository)
+    ICarsRepository carRepository)
 {
     public async Task<List<CarEntity>?> GetAll()
     {

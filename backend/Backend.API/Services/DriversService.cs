@@ -1,12 +1,13 @@
 using Backend.DataAccess.DTO.Requests.Driver;
 using Backend.DataAccess.Entities;
 using Backend.DataAccess.Repositories;
+using Backend.DataAccess.Repositories.Abstractions;
 
 namespace Backend.API.Services;
 
 public class DriversService(
     ILogger<DriversService> logger,
-    DriversRepository driversRepository)
+    IDriversRepository driversRepository)
 {
     public async Task<List<DriverEntity>> GetAll()
     {

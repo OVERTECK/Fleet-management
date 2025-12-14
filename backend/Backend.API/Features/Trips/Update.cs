@@ -1,5 +1,6 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
+using Backend.API.Services.Abstraction;
 using Backend.DataAccess.DTO.Requests;
 using Backend.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ public class Update : IEndpoint
     }
 }
 
-sealed class TripsUpdateHandler(ILogger<TripsUpdateHandler> logger, TripsService service)
+sealed class TripsUpdateHandler(ILogger<TripsUpdateHandler> logger, ITripsService service)
 {
     public async Task<IResult> Handle(UpdateTripRequest request)
     {

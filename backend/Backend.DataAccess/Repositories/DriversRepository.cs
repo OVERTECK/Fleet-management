@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.DataAccess.Repositories;
 
-public sealed class DriversRepository(MyDbContext dbContext) : IDriverRepository
+public sealed class DriversRepository(MyDbContext dbContext) : IDriversRepository
 {
 
     public async Task<List<DriverEntity>> GetAll()
