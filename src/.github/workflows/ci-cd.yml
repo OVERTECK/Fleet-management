@@ -1,0 +1,50 @@
+# .github/workflows/ci-cd.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "test-frontend" ]  # Ваша тестовая ветка для фронтенда
+  pull_request:
+    branches: [ "master" ]  # Когда мерж в master (с бэком)
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Установка Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'  # Из вашего package.json (@types/node: ^20)
+      - name: Установка зависимостей
+        run: npm ci
+      - name: Запуск тестов (Playwright + Jest)
+        run: |
+          npx playwright install --with-deps  # Для браузеров в CI
+          npm run test  # Ваши тесты
+      - name: Линтинг
+        run: npm run lint  # Из вашего package.json
+
+  deploy:
+    needs: test  # Деплой только если тесты прошли
+    if: github.ref == 'refs/heads/master'  # Только на master (когда добавите бэк)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Установка Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Установка зависимостей
+        run: npm ci
+      - name: Билд приложения
+        run: npm run build
+      - name: Деплой на Vercel (фронтенд)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}  # Добавьте secret в GitHub Settings
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          scope: ${{ secrets.VERCEL_ORG_ID }}
+          working-directory: ./  # Если фронт в корне
+      # Для бэка (когда добавите): добавьте шаг для деплоя на Render/Heroku, используя их actions

@@ -151,7 +151,7 @@ export default function TripsPage() {
             if (filtered && reportDateRange.start && reportDateRange.end) {
                 blob = await reportService.exportTripsByDate(reportDateRange.start, reportDateRange.end);
             } else {
-                blob = await reportService.exportTrips();
+                blob = await reportService.exportTripsReport();
             }
 
             const url = window.URL.createObjectURL(blob);
