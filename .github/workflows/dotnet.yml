@@ -5,7 +5,25 @@ on:
     branches: [master, backend-dev, test-fronted]
 
 jobs:
-  tests:
-    runs-on: ununtu-latest
-  build:
-
+  build-and-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with: 
+          dotnet-version: '9.0'
+      
+      - name: Restore
+        run: dotnet restore
+        
+      - name: Build
+        run: dotnet build --configuration Release --no-restore
+          
+      - name: Tests
+        run: dotnet test --configuration Release --no-build --verbosity normal
+        
+      - name: Publish
+        run: dotnet publish --configuration Release --no-build --output ./publish
