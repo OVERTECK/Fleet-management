@@ -2,10 +2,10 @@
   api:
     image: api
     build:
-      context: .
-      dockerfile: ./backend/Backend.API/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     ports:
-      - 8000:8080
+      - "8000:8080"
     networks:
       - app_network
   
@@ -30,7 +30,7 @@
     environment:
       POSTGRES_PASSWORD: admin
       POSTGRES_USER: admin
-      POSTGRES_DB: postgres
+      POSTGRES_DB: car_park_db
       PGDATA: ./pgdata
     volumes:
       - ./pgdata:/var/lib/postgresql/data/pgdata
@@ -42,12 +42,12 @@
     restart: always
     image: client
     build:
-      context: ./frontend/app
+      context: ./frontend
       dockerfile: Dockerfile
     networks:
       - app_network
     ports:
-      - "443:3000"
+      - "3000:3000"
 
   proxy:
     restart: always

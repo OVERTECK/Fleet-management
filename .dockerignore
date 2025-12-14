@@ -1,0 +1,16 @@
+﻿.git
+.gitignore
+Dockerfile
+docker-compose*.yml
+**/node_modules/
+#**/.next/
+.env*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist
+**appendonlydir/
+docker-compose*
+*.log
+.env.local
+.env.*.local

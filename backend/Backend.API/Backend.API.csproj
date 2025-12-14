@@ -44,13 +44,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
+      <ProjectReference Include="..\Backend.DataAccess\Backend.DataAccess.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Backend.DataAccess\Backend.DataAccess.csproj" />
+      <None Remove="Dockerfile" />
     </ItemGroup>
 
 </Project>
