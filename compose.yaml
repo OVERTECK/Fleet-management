@@ -3,12 +3,12 @@
     image: api
     build:
       context: .
-      dockerfile: Backend.API/Dockerfile
+      dockerfile: ./backend/Backend.API/Dockerfile
     ports:
       - 8000:8080
     networks:
       - app_network
-  `
+  
   redis:
     image: redis:latest
     restart: always
