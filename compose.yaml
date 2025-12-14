@@ -1,5 +1,6 @@
 ﻿services:
   api:
+    container_name: api
     image: api
     build:
       context: ./backend
@@ -31,7 +32,7 @@
       POSTGRES_PASSWORD: admin
       POSTGRES_USER: admin
       POSTGRES_DB: car_park_db
-      PGDATA: ./pgdata
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
       - ./pgdata:/var/lib/postgresql/data/pgdata
     networks:
