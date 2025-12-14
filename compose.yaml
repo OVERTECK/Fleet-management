@@ -62,9 +62,6 @@
       - "443:443"
     networks:
       - app_network
-    depends_on:
-      - client
-      - api
 
 networks:
   app_network:

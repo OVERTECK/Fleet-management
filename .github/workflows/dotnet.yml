@@ -5,7 +5,7 @@ on:
     branches: [master, backend-dev, test-fronted]
 
 jobs:
-  build-and-tests:
+  build-backend:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -26,4 +26,6 @@ jobs:
         run: dotnet test ./backend/Backend.Tests --configuration Release --no-build --verbosity normal
         
       - name: Publish
-        run: dotnet publish ./backend --configuration Release --no-build --output ./publish
+        run: dotnet publish ./backend --configuration Release --no-build
+  build-frontend:
+    
