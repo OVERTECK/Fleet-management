@@ -1,13 +1,22 @@
 using Backend.API.EndpointsSettings;
+using Backend.DataAccess;
 using Microsoft.AspNetCore.CookiePolicy;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 namespace Backend.API.Configuration;
 
 public static class AppExtensions
 {
-    public static IApplicationBuilder Configure(this WebApplication app)
+    public static async Task<IApplicationBuilder> Configure(this WebApplication app)
     {
+        using (var scope = app.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+
+            await db.Database.MigrateAsync();
+        }
+
         app.UseSerilogRequestLogging();
 
         app.UseCookiePolicy(new CookiePolicyOptions
