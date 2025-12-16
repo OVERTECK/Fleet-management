@@ -1,5 +1,7 @@
 using System.Globalization;
 using Backend.API.Configuration;
+using Backend.DataAccess;
+using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
@@ -14,6 +16,13 @@ try
     builder.Services.AddConfiguration(builder.Configuration);
 
     var app = builder.Build();
+
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
+
+        await db.Database.MigrateAsync();
+    }
 
     app.Configure();
 

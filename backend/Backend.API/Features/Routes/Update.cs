@@ -1,6 +1,5 @@
 using Backend.API.EndpointsSettings;
 using Backend.API.Services;
-using Backend.DataAccess.DTO.Requests;
 using Backend.DataAccess.Entities;
 using Microsoft.EntityFrameworkCore;
 

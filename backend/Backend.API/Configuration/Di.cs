@@ -173,7 +173,7 @@ public static class Di
             options.AddPolicy("AllowFrontend", policy =>
             {
                 policy
-                    .AllowAnyOrigin()
+                    .WithOrigins("http://localhost:3000", "https://overteck.ru", "https://api.overteck.ru")
                     .AllowAnyHeader()
                     .AllowAnyMethod()
                     .AllowCredentials();

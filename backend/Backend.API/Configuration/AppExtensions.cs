@@ -8,18 +8,11 @@ namespace Backend.API.Configuration;
 
 public static class AppExtensions
 {
-    public static async Task<IApplicationBuilder> Configure(this WebApplication app)
+    public static IApplicationBuilder Configure(this WebApplication app)
     {
-        using (var scope = app.Services.CreateScope())
-        {
-            var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
-
-            await db.Database.MigrateAsync();
-        }
-
         app.UseSerilogRequestLogging();
 
-        // app.UseRouting();
+        app.UseRouting();
 
         app.UseCookiePolicy(new CookiePolicyOptions
         {
