@@ -19,6 +19,8 @@ public static class AppExtensions
 
         app.UseSerilogRequestLogging();
 
+        app.UseRouting();
+
         app.UseCookiePolicy(new CookiePolicyOptions
         {
             MinimumSameSitePolicy = SameSiteMode.Strict,
