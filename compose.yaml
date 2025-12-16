@@ -6,7 +6,7 @@
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8000:8080"
+      - "8080:8080"
     networks:
       - app_network
     depends_on:
