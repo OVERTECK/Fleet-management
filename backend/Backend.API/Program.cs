@@ -17,14 +17,7 @@ try
 
     var app = builder.Build();
 
-    using (var scope = app.Services.CreateScope())
-    {
-        var db = scope.ServiceProvider.GetRequiredService<MyDbContext>();
-
-        await db.Database.MigrateAsync();
-    }
-
-    app.Configure();
+    await app.Configure();
 
     app.Run();
 }
