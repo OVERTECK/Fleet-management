@@ -1,7 +1,5 @@
 using System.Globalization;
 using Backend.API.Configuration;
-using Backend.DataAccess;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 
 Log.Logger = new LoggerConfiguration()
