@@ -9,6 +9,8 @@
       - "8000:8000"
     networks:
       - app_network
+    environment:
+      - ASPNETCORE_HTTP_PORTS=8000
     depends_on:
       - postgres
   
