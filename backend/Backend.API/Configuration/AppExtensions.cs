@@ -20,7 +20,7 @@ public static class AppExtensions
 
             await db.Database.MigrateAsync();
         }
-        
+
         app.UseCookiePolicy(new CookiePolicyOptions
         {
             MinimumSameSitePolicy = SameSiteMode.Strict,

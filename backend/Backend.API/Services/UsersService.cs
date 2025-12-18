@@ -15,7 +15,7 @@ public class UsersService(
 
         if (searchedUser == null)
         {
-            throw new NullReferenceException("User not found");
+            throw new UnauthorizedAccessException("User not found");
         }
 
         var hashedPassword = hashService.CreateHash(signInRequest.Password);
@@ -34,7 +34,7 @@ public class UsersService(
 
         if (searchedUser == null)
         {
-            throw new NullReferenceException("User not found");
+            throw new ArgumentException("User not found");
         }
 
         return searchedUser;
