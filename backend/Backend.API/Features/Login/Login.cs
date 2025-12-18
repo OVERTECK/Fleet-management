@@ -51,6 +51,12 @@ sealed class LoginHandler(
                 roleId = user.RoleId,
             });
         }
+        catch (ArgumentException ex)
+        {
+            logger.LogError(ex.Message);
+
+            return Results.BadRequest();
+        }
         catch (UnauthorizedAccessException ex)
         {
             logger.LogError(ex.Message);
