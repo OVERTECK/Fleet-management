@@ -47,8 +47,6 @@ public sealed class CarsRepository(MyDbContext dbContext) : ICarsRepository
                 .SetProperty(c => c.Status, car.Status)
                 .SetProperty(c => c.TotalKM, car.TotalKM));
 
-        await dbContext.SaveChangesAsync();
-
         return car;
     }
 
@@ -62,8 +60,6 @@ public sealed class CarsRepository(MyDbContext dbContext) : ICarsRepository
         }
 
         await dbContext.Cars.Where(c => c.VIN == vin).ExecuteDeleteAsync();
-
-        await dbContext.SaveChangesAsync();
     }
 
     public async Task<bool> IsExists(string id)
